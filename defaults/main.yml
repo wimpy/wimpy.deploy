@@ -1,0 +1,105 @@
+---
+
+wimpy_project_name: "{{ wimpy_project | regex_replace('[^a-zA-Z0-9]', '-') }}"
+
+wimpy_docker_image_name: "{{ wimpy_project_name }}" # Name of the docker image that will be created
+wimpy_docker_image_version: "{{ (wimpy_release_version == 'master') | ternary('latest',wimpy_release_version) }}" # Version of the docker image to push.
+wimpy_docker_build_command: "docker build --tag {{ wimpy_docker_image_name }}:{{ wimpy_docker_image_version }} ."
+wimpy_dockerfile: "{{ playbook_dir }}/../docker-compose-{{ wimpy_deployment_environment }}.yml" # docker-compose file to use to start the app
+
+wimpy_aws_ami_name: "CoreOS-stable-*" # The latest version of this AMI name will be used
+
+wimpy_aws_dns_name: "{{ wimpy_project_name }}" # DNS record for the deployed instance
+
+wimpy_aws_region: "eu-west-1"
+
+# Auto Scaling Group parameters
+wimpy_aws_autoscalinggroup_min_size: 1
+wimpy_aws_autoscalinggroup_max_size: 2
+wimpy_aws_autoscalinggroup_desired_capacity: 1
+
+# There are two different strategies:
+# - rolling_asg: old instances will be replaced by new instances with the new launch configuration
+# - new_asg: old instances stay alive, new stack is created
+wimpy_deploy_strategy: "rolling_asg"
+
+wimpy_dns_ttl: 300 # DNS record Time To Live
+
+wimpy_needs_elb: false # Whether or not to assign an ELB in front of the ASG instances
+
+wimpy_app_port: 8000 # Port where app will be listening for requests
+
+# ELB Basic Configuration
+wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
+wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connections to drain before terminating an instance
+wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
+
+# ELB Healthcheck
+wimpy_aws_elb_health_check:
+  ping_protocol: http
+  ping_port: "{{ wimpy_app_port }}"
+  ping_path: /healthcheck
+  response_timeout: 5
+  interval: 10
+  unhealthy_threshold: 2
+  healthy_threshold: 3
+
+# ELB Listeners. By default ELB listens on port 80 and forward requests to {{app_port}} using HTTP
+wimpy_aws_elb_listeners:
+  - protocol: "http"
+    load_balancer_port: "80"
+    instance_port: "{{ wimpy_app_port }}"
+
+wimpy_aws_instance_type: t2.small # EC2 instance type
+
+#role_instance_profile: "ansible-deploy" # When commented out, role set to instances. Role needs to exists
+
+# User data executed when the instance is started. We basically do:
+# - Install docker-compose
+# - Create systemd units to start our service
+#
+# Systemd unit executes docker-compose up
+wimpy_user_data: |-
+  #cloud-config
+  write_files:
+    - path: /home/core/install_docker_compose
+      owner: core:core
+      permissions: 0744
+      content: |
+        #!/bin/sh
+        mkdir -p /opt/bin
+        curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
+        chmod +x /opt/bin/docker-compose
+    - path: /home/core/docker-compose.yml
+      owner: core:core
+      permissions: 0644
+      content: |
+        {{ lookup('file', wimpy_dockerfile) | indent(6, False) }}
+  coreos:
+    units:
+      - name: "{{ wimpy_project_name }}.service"
+        command: "start"
+        content: |
+          [Unit]
+          Description={{ wimpy_project_name }} container
+          After=install_docker_compose.service
+          Requires=install_docker_compose.service
+          [Service]
+          User=core
+          Restart=always
+          ExecStart=-/usr/bin/docker-compose up
+          ExecStop=-/usr/bin/docker-compose down
+          [Install]
+          WantedBy=multi-user.target
+      - name: install_docker_compose.service
+        command: "start"
+        content: |
+          [Unit]
+          Description=Install docker-compose
+          After=docker.service
+          Requires=docker.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/home/core/install_docker_compose
+

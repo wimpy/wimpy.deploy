@@ -1,0 +1,19 @@
+---
+
+- name: "Find old Launch Configs"
+  ec2_lc_find:
+    profile: "{{ boto_profile | default(omit) }}"
+    region: "{{ wimpy_aws_region }}"
+    name_regex: "{{ wimpy_project_name }}-.*"
+    sort: true
+    sort_end: -10
+  register: old_launch_config
+
+- name: "Remove old Launch Configs"
+  ec2_lc:
+    profile: "{{ boto_profile | default(omit) }}"
+    region: "{{ wimpy_aws_region }}"
+    name: "{{ item.name }}"
+    state: absent
+  with_items: old_launch_config.results
+  ignore_errors: yes

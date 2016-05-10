@@ -1,0 +1,16 @@
+---
+
+- name: Checking that required variables are set
+  fail: msg="{{ item }} is a required variable. Set it in your playbook file"
+  when: not {{ item }} is defined
+  with_items:
+    - wimpy_project_name
+    - wimpy_release_version
+    - wimpy_deployment_environment
+    - wimpy_aws_vpc_id
+    - wimpy_aws_keypair
+    - wimpy_aws_hosted_zone_name
+    - wimpy_aws_elb_security_groups
+    - wimpy_aws_elb_vpc_subnets
+    - wimpy_aws_lc_security_groups
+    - wimpy_aws_asg_vpc_subnets

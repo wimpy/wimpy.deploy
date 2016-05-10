@@ -1,0 +1,11 @@
+---
+
+- name: "Build docker image with app's code"
+  shell: "{{ wimpy_docker_build_command }}"
+
+- name: "Login into registry in case that Dockerfile is built from private image"
+  template: src=templates/docker_login.json dest={{ ansible_env.HOME }}/.docker/config.json force=no
+  when: wimpy_dockerhub_auth is defined and wimpy_dockerhub_email is defined
+
+- name: "Push docker image to registry"
+  shell: "docker push {{ wimpy_docker_image_name }}:{{ wimpy_docker_image_version }}"

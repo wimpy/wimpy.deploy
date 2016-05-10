@@ -1,0 +1,22 @@
+---
+
+- name: "Rendering CloudFormation template"
+  shell: python {{ role_path }}/troposphere/asg.py > /tmp/cloudformation.json
+  changed_when: false
+
+- name: "Creates CloudFormation with ASG"
+  cloudformation:
+    stack_name: "{{ wimpy_project_name }}"
+    state: present
+    region: "{{ wimpy_aws_region }}"
+    template: "/tmp/cloudformation.json"
+    template_parameters:
+      LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"
+      ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
+      MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
+      MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
+      Subnets: "{{ wimpy_aws_asg_vpc_subnets }}"
+    tags:
+      Stack: "{{ wimpy_project_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"

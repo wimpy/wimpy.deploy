@@ -1,0 +1,47 @@
+---
+
+- name: "Rendering CloudFormation template"
+  shell: python {{ role_path }}/troposphere/asg-elb-dns.py > /tmp/cloudformation.json
+  changed_when: false
+
+- name: "Creates CloudFormation with ELB, ASG and Route53 DNS"
+  cloudformation:
+    stack_name: "{{ wimpy_project_name }}"
+    state: present
+    region: "{{ wimpy_aws_region }}"
+    template: "/tmp/cloudformation.json"
+    template_parameters:
+      LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"
+      ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
+      MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
+      MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
+      Subnets: "{{ wimpy_aws_asg_vpc_subnets }}"
+      LoadBalancerName: "{{ wimpy_elb_name }}"
+      LoadBalancerSchema: "{{ wimpy_aws_elb_scheme }}"
+      LoadBalancerSecurityGroup: "{{ wimpy_aws_elb_security_groups }}"
+      HostedZoneName: "{{ wimpy_aws_hosted_zone_name }}"
+      DNSRecord: "{{ wimpy_aws_dns_name }}"
+      LoadBalancerHealthCheckTarget: "HTTP:80/"
+      LoadBalancerHealthyThreshold: 2
+      LoadBalancerUnHealthyThreshold: 2
+      LoadBalancerHealthCheckInterval: 10
+      LoadBalancerHealthCheckTimeout: 5
+    tags:
+      Stack: "{{ wimpy_project_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"
+
+- name: "Configure Elastic Load Balancers"
+  ec2_elb_lb:
+    profile: "{{ boto_profile | default(omit) }}"
+    state: present
+    name: "{{ wimpy_elb_name }}"
+    region: "{{ wimpy_aws_region }}"
+    security_group_ids: "{{ wimpy_aws_elb_security_groups }}"
+    subnets: "{{ wimpy_aws_elb_vpc_subnets }}"
+    connection_draining_timeout: "{{ wimpy_aws_elb_draining_timeout }}"
+    cross_az_load_balancing: "{{ wimpy_cross_az_load_balancing }}"
+    scheme: "{{ wimpy_aws_elb_scheme }}"
+    listeners: "{{ wimpy_aws_elb_listeners }}"
+    health_check: "{{ wimpy_aws_elb_health_check }}"
+  register: wimpy_elb_result

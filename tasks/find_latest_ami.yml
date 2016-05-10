@@ -1,0 +1,15 @@
+---
+
+- name: "Search for the latest AMI available"
+  ec2_ami_find:
+    profile: "{{ boto_profile | default(omit) }}"
+    name: "{{ wimpy_aws_ami_name }}"
+    region: "{{ wimpy_aws_region }}"
+    sort: name
+    sort_order: descending
+    sort_end: 1
+    no_result_action: fail
+  register: ami_result
+
+- set_fact:
+    wimpy_aws_ami_id: "{{ ami_result.results[0].ami_id }}"
