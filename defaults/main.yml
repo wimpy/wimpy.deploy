@@ -68,7 +68,7 @@ wimpy_user_data: |-
       content: |
         #!/bin/sh
         mkdir -p /opt/bin
-        curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
+        curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
         chmod +x /opt/bin/docker-compose
     - path: /home/core/docker-compose.yml
       owner: core:core
@@ -87,8 +87,8 @@ wimpy_user_data: |-
           [Service]
           User=core
           Restart=always
-          ExecStart=-/usr/bin/docker-compose up
-          ExecStop=-/usr/bin/docker-compose down
+          ExecStart=-/opt/bin/docker-compose -f /home/core/docker-compose.yml up
+          ExecStop=-/opt/bin/docker-compose -f /home/core/docker-compose.yml down
           [Install]
           WantedBy=multi-user.target
       - name: install_docker_compose.service
