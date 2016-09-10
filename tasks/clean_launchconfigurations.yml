@@ -15,5 +15,5 @@
     region: "{{ wimpy_aws_region }}"
     name: "{{ item.name }}"
     state: absent
-  with_items: old_launch_config.results
+  with_items: "{{ old_launch_config.results }}"
   ignore_errors: yes

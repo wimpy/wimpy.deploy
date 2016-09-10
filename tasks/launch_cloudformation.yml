@@ -12,6 +12,7 @@
     region: "{{ wimpy_aws_region }}"
     template: "/tmp/cloudformation.json"
     template_parameters:
+      Name: "{{ wimpy_project_name }}"
       LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
       ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"

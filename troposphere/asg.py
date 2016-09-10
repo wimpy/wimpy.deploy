@@ -12,6 +12,12 @@ def generate_cloudformation_template():
     template.add_description("""\
     Configures Auto Scaling Group for the app""")
 
+    project_name = template.add_parameter(Parameter(
+        "Name",
+        Type="String",
+        Description="Instances will be tagged with this name",
+    ))
+
     scalecapacity = template.add_parameter(Parameter(
         "ScaleCapacity",
         Default="1",
@@ -50,6 +56,7 @@ def generate_cloudformation_template():
     autoscalinggroup = template.add_resource(AutoScalingGroup(
         "AutoscalingGroup",
         Tags=[
+            Tag("Name", Ref(project_name), True),
             Tag("Environment", Ref(environment), True)
         ],
         LaunchConfigurationName=Ref(launchconfigurationname),

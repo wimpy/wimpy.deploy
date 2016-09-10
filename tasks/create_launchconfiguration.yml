@@ -10,7 +10,12 @@
     security_groups: "{{ wimpy_aws_lc_security_groups }}"
     instance_type: "{{ wimpy_aws_instance_type }}"
     instance_profile_name: "{{ wimpy_role_instance_profile | default(omit) }}"
-    assign_public_ip: yes
+    ramdisk_id: "{{ wimpy_ramdisk_id | default(omit) }}"
+    spot_price: "{{ wimpy_spot_price | default(omit) }}"
+    instance_monitoring: "{{ wimpy_instance_monitoring | default(omit) }}"
+    ebs_optimized: "{{ wimpy_ebs_optimized | default(omit) }}"
+    volumes: "{{ wimpy_volumes | default(omit) }}"
+    assign_public_ip: "{{ wimpy_assign_public_ip | default(omit) }}"
     user_data: "{{ wimpy_user_data }}"
   register: lc_result
 
