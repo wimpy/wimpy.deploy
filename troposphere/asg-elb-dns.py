@@ -124,7 +124,7 @@ def generate_cloudformation_template():
             ),
         ],
         CrossZone=True,
-        SecurityGroups=[Ref(loadbalancersecuritygroup)],
+        SecurityGroups=Ref(loadbalancersecuritygroup),
         LoadBalancerName=Ref(loadbalancername),
         Scheme=Ref(elbSchema),
     ))
