@@ -33,7 +33,7 @@ def generate_cloudformation_template():
 
     loadbalancersecuritygroup = template.add_parameter(Parameter(
         "LoadBalancerSecurityGroup",
-        Type="String",
+        Type="CommaDelimitedList",
         Description="Security group for api app load balancer.",
     ))
 
@@ -64,7 +64,7 @@ def generate_cloudformation_template():
 
     subnet = template.add_parameter(Parameter(
         "Subnets",
-        Type="String",
+        Type="CommaDelimitedList",
     ))
 
     loadbalancername = template.add_parameter(Parameter(
