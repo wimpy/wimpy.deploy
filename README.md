@@ -21,9 +21,8 @@ To use this role, your project repository should contain a playbook like the fol
      wimpy_aws_keypair: "midleware"
      wimpy_aws_hosted_zone_name: "{{ vars.group_names[0] }}.spain.schibsted.io."
      wimpy_aws_elb_security_groups: ["sg-asd234sa", "sg-ifufd34sa"]
-     wimpy_aws_elb_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
+     wimpy_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
      wimpy_aws_lc_security_groups: ["sg-asd234sa", "sg-ifufd34sa"]
-     wimpy_aws_asg_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
   roles:
     - role: wimpy
 ```
@@ -52,9 +51,8 @@ The only required parameters that have no default values are:
 - wimpy_aws_keypair: "authentication" # Key pair to put on EC2 instances
 - wimpy_aws_hosted_zone_name: "example.com" # Hosted zone where to create the DNS record for your project
 - wimpy_aws_elb_security_groups: ["sg-asd234sa"]
-- wimpy_aws_elb_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
+- wimpy_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
 - wimpy_aws_lc_security_groups: ["sg-asd234sa", "sg-ifufd34sa"]
-- wimpy_aws_asg_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
 ```
 Traditionally, `wimpy_release_version` will contain the new version pushed to the repository that is being built on Jenkins.
 

@@ -11,6 +11,5 @@
     - wimpy_aws_keypair
     - wimpy_aws_hosted_zone_name
     - wimpy_aws_elb_security_groups
-    - wimpy_aws_elb_vpc_subnets
+    - wimpy_vpc_subnets
     - wimpy_aws_lc_security_groups
-    - wimpy_aws_asg_vpc_subnets

@@ -18,6 +18,12 @@ def generate_cloudformation_template():
         Description="Instances will be tagged with this name",
     ))
 
+    health_check_grace_period = template.add_parameter(Parameter(
+        "HealthCheckGracePeriod",
+        Type="String",
+        Default="300",
+    ))
+
     scalecapacity = template.add_parameter(Parameter(
         "ScaleCapacity",
         Default="1",
@@ -65,7 +71,7 @@ def generate_cloudformation_template():
         DesiredCapacity=Ref(scalecapacity),
         VPCZoneIdentifier=Ref(subnet),
         HealthCheckType='EC2',
-        HealthCheckGracePeriod=30,
+        HealthCheckGracePeriod=Ref(health_check_grace_period),
         UpdatePolicy=UpdatePolicy(
             AutoScalingRollingUpdate=AutoScalingRollingUpdate(
                 PauseTime='PT1M',
@@ -75,8 +81,10 @@ def generate_cloudformation_template():
         )
     ))
 
-    template.add_output(Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
-    template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname), Description="LaunchConfiguration for this deploy"))
+    template.add_output(
+        Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
+    template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname),
+                               Description="LaunchConfiguration for this deploy"))
 
     return template
 

@@ -15,6 +15,7 @@
       Name: "{{ wimpy_project_name }}"
       LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
+      HealthCheckGracePeriod: "{{ wimpy_asg_healthcheck_grace_period }}"
       ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
       MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
       MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"

@@ -14,13 +14,19 @@ def generate_cloudformation_template():
     template.add_description("""\
     Configures Auto Scaling Group for the app""")
 
+    project_name = template.add_parameter(Parameter(
+        "Name",
+        Type="String",
+        Description="Instances will be tagged with this name",
+    ))
+
     hostedzone = template.add_parameter(Parameter(
         "HostedZoneName",
         Description="The DNS name of an existing Amazon Route 53 hosted zone",
         Type="String",
     ))
 
-    dnsRecord = template.add_parameter(Parameter(
+    dns_record = template.add_parameter(Parameter(
         "DNSRecord",
         Type="String",
     ))
@@ -66,32 +72,38 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
-    elbSchema = template.add_parameter(Parameter(
+    elb_schema = template.add_parameter(Parameter(
         "LoadBalancerSchema",
         Type="String",
     ))
 
-    healthCheckTarget = template.add_parameter(Parameter(
+    health_check_grace_period = template.add_parameter(Parameter(
+        "HealthCheckGracePeriod",
+        Type="String",
+        Default="300",
+    ))
+
+    health_check_target = template.add_parameter(Parameter(
         "LoadBalancerHealthCheckTarget",
         Type="String",
     ))
 
-    healthCheckInterval = template.add_parameter(Parameter(
+    health_check_interval = template.add_parameter(Parameter(
         "LoadBalancerHealthCheckInterval",
         Type="String",
     ))
 
-    healthCheckTimeout = template.add_parameter(Parameter(
+    health_check_timeout = template.add_parameter(Parameter(
         "LoadBalancerHealthCheckTimeout",
         Type="String",
     ))
 
-    healthyThreshold = template.add_parameter(Parameter(
+    healthy_threshold = template.add_parameter(Parameter(
         "LoadBalancerHealthyThreshold",
         Type="String",
     ))
 
-    unhealthyThreshold = template.add_parameter(Parameter(
+    unhealthy_threshold = template.add_parameter(Parameter(
         "LoadBalancerUnHealthyThreshold",
         Type="String",
     ))
@@ -109,11 +121,11 @@ def generate_cloudformation_template():
         ),
         Subnets=Ref(subnet),
         HealthCheck=elb.HealthCheck(
-            Target=Ref(healthCheckTarget),
-            HealthyThreshold=Ref(healthyThreshold),
-            UnhealthyThreshold=Ref(unhealthyThreshold),
-            Interval=Ref(healthCheckInterval),
-            Timeout=Ref(healthCheckTimeout),
+            Target=Ref(health_check_target),
+            HealthyThreshold=Ref(healthy_threshold),
+            UnhealthyThreshold=Ref(unhealthy_threshold),
+            Interval=Ref(health_check_interval),
+            Timeout=Ref(health_check_timeout),
         ),
         Listeners=[
             elb.Listener(
@@ -126,12 +138,13 @@ def generate_cloudformation_template():
         CrossZone=True,
         SecurityGroups=Ref(loadbalancersecuritygroup),
         LoadBalancerName=Ref(loadbalancername),
-        Scheme=Ref(elbSchema),
+        Scheme=Ref(elb_schema),
     ))
 
     autoscalinggroup = template.add_resource(AutoScalingGroup(
         "AutoscalingGroup",
         Tags=[
+            Tag("Name", Ref(project_name), True),
             Tag("Environment", Ref(environment), True)
         ],
         LaunchConfigurationName=Ref(launchconfigurationname),
@@ -141,7 +154,7 @@ def generate_cloudformation_template():
         LoadBalancerNames=[Ref(loadbalancer)],
         VPCZoneIdentifier=Ref(subnet),
         HealthCheckType='ELB',
-        HealthCheckGracePeriod=30,
+        HealthCheckGracePeriod=Ref(health_check_grace_period),
         UpdatePolicy=UpdatePolicy(
             AutoScalingRollingUpdate=AutoScalingRollingUpdate(
                 PauseTime='PT1M',
@@ -154,7 +167,7 @@ def generate_cloudformation_template():
     route53record = template.add_resource(RecordSetType(
         "myDNSRecord",
         HostedZoneName=Join("", [Ref(hostedzone), "."]),
-        Name=Join("", [Ref(dnsRecord), ".", Ref(hostedzone), "."]),
+        Name=Join("", [Ref(dns_record), ".", Ref(hostedzone), "."]),
         Type="CNAME",
         TTL="300",
         ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
@@ -162,8 +175,10 @@ def generate_cloudformation_template():
 
     template.add_output(Output("DomainName", Value=Ref(route53record), Description="DNS to access the service"))
     template.add_output(Output("LoadBalancer", Value=GetAtt(loadbalancer, "DNSName"), Description="ELB dns"))
-    template.add_output(Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
-    template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname), Description="LaunchConfiguration for this deploy"))
+    template.add_output(
+        Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
+    template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname),
+                               Description="LaunchConfiguration for this deploy"))
 
     return template
 
