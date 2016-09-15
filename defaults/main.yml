@@ -17,7 +17,7 @@ wimpy_aws_region: "eu-west-1"
 wimpy_aws_autoscalinggroup_min_size: 1
 wimpy_aws_autoscalinggroup_max_size: 2
 wimpy_aws_autoscalinggroup_desired_capacity: 1
-wimpy_aws_asg_vpc_subnets: {{ wimpy_vpc_subnets }}
+wimpy_aws_asg_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_asg_healthcheck_grace_period: 300
 
 # There are two different strategies:
@@ -35,7 +35,7 @@ wimpy_app_port: 8000 # Port where app will be listening for requests
 wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
 wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
-wimpy_aws_elb_vpc_subnets: {{ wimpy_vpc_subnets }}
+wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 
 # ELB Healthcheck
 wimpy_aws_elb_health_check:
