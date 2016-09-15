@@ -19,7 +19,7 @@
       ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
       MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
       MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
-      Subnets: "{{ wimpy_aws_asg_vpc_subnets }}"
+      Subnets: "{{' ,'.join(wimpy_aws_asg_vpc_subnets) }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
