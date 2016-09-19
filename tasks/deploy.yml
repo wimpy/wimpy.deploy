@@ -12,3 +12,5 @@
 
 - include: launch_cloudformation.yml
   when: not wimpy_needs_elb
+
+- include: scaling_policies.yml

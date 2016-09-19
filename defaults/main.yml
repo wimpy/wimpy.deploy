@@ -3,7 +3,7 @@
 wimpy_project_name: "{{ wimpy_project | regex_replace('[^a-zA-Z0-9]', '-') }}"
 
 wimpy_docker_image_name: "{{ wimpy_project_name }}" # Name of the docker image that will be created
-wimpy_docker_image_version: "{{ (wimpy_release_version == 'master') | ternary('latest',wimpy_release_version) }}" # Version of the docker image to push.
+wimpy_docker_image_version: "{{ (wimpy_release_version == 'master') | ternary('latest',wimpy_release_version) | string }}" # Version of the docker image to push.
 wimpy_docker_build_command: "docker build --tag {{ wimpy_docker_image_name }}:{{ wimpy_docker_image_version }} ."
 wimpy_dockerfile: "{{ playbook_dir }}/../docker-compose-{{ wimpy_deployment_environment }}.yml" # docker-compose file to use to start the app
 
@@ -19,6 +19,59 @@ wimpy_aws_autoscalinggroup_max_size: 2
 wimpy_aws_autoscalinggroup_desired_capacity: 1
 wimpy_aws_asg_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_asg_healthcheck_grace_period: 300
+wimpy_high_cpu_threshold: 85
+wimpy_low_cpu_threshold: 20
+
+wimpy_scaling_policies:
+  - name: "{{ wimpy_project_name }}-cpu-high"
+    scaling_adjustment: 1
+    cooldown: 300
+    adjustment_type: "ChangeInCapacity"
+
+  - name: "{{ wimpy_project_name }}-cpu-low"
+    scaling_adjustment: -1
+    cooldown: 300
+    adjustment_type: "ChangeInCapacity"
+
+wimpy_alarm_metrics:
+  - name: "{{ wimpy_project_name }}-cpu-high"
+    metric: "CPUUtilization"
+    statistics: Average
+    comparison: ">="
+    threshold: "{{ wimpy_high_cpu_threshold }}"
+    period: 300
+    evaluation_periods: 2
+    unit: "Percent"
+    description: "CPU utilization is >= {{ wimpy_high_cpu_threshold }}% for two periods of 5 minutes."
+    dimensions:
+      AutoScalingGroupName: "{{ wimpy_project_name }}"
+    scaling_policy_name: "{{ wimpy_project_name }}-cpu-high"
+
+  - name: "{{ wimpy_project_name }}-cpu-low"
+    metric: "CPUUtilization"
+    statistics: Average
+    comparison: "<"
+    threshold: "{{ wimpy_low_cpu_threshold }}"
+    period: 300
+    evaluation_periods: 2
+    unit: "Percent"
+    description: "CPU utilization is < {{ wimpy_low_cpu_threshold }}% for two periods of 5 minutes"
+    dimensions:
+      AutoScalingGroupName: "{{ wimpy_project_name }}"
+    scaling_policy_name: "{{ wimpy_project_name }}-cpu-low"
+
+  - name: "{{ wimpy_project_name }}-healthy-nodes-low"
+    metric: "HealthyHostCount"
+    statistics: Average
+    comparison: "<"
+    threshold: "1"
+    period: 300
+    evaluation_periods: 1
+    unit: "Count"
+    description: "No healthy instances behind the ELB for 5 minutes"
+    dimensions:
+      ElasticLoadBalancerName: "GroupELB"
+    scaling_policy_name: "{{ wimpy_project_name }}-healthy-nodes-low"
 
 # There are two different strategies:
 # - rolling_asg: old instances will be replaced by new instances with the new launch configuration
@@ -77,7 +130,7 @@ wimpy_user_data: |-
       owner: core:core
       permissions: 0644
       content: |
-        {{ lookup('file', wimpy_dockerfile) | indent(6, False) }}
+        "{{ lookup('file', wimpy_dockerfile) | replace(wimpy_docker_image_name, wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}"
   coreos:
     units:
       - name: "{{ wimpy_project_name }}.service"

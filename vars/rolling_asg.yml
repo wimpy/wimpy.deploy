@@ -6,4 +6,3 @@ wimpy_elb_result:
 
 wimpy_elb_name: "{{ wimpy_project_name }}"
 wimpy_asg_name: "{{ wimpy_project_name }}"
-wimpy_auto_enable_asg: true

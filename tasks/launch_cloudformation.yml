@@ -23,3 +23,4 @@
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
+  register: autoscaling

@@ -32,6 +32,7 @@
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
+  register: autoscaling
 
 - name: "Configure Elastic Load Balancers"
   ec2_elb_lb:
