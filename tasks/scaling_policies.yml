@@ -11,7 +11,7 @@
     min_adjustment_step: 1
     cooldown: "{{ item.cooldown }}"
   register: "sp_result"
-  with_items: wimpy_scaling_policies
+  with_items: "{{ wimpy_scaling_policies }}"
 
 - ec2_metric_alarm:
     profile: "{{ boto_profile | default(omit) }}"
