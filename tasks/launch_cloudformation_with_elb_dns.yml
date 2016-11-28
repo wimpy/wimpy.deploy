@@ -35,6 +35,10 @@
       Environment: "{{ wimpy_deployment_environment }}"
   register: autoscaling
 
+- set_fact:
+    auto_scaling_group: "{{ autoscaling }}"
+  when: autoscaling.changed
+
 - name: "Configure Elastic Load Balancers"
   ec2_elb_lb:
     profile: "{{ boto_profile | default(omit) }}"
