@@ -46,5 +46,6 @@
     cross_az_load_balancing: "{{ wimpy_cross_az_load_balancing }}"
     scheme: "{{ wimpy_aws_elb_scheme }}"
     listeners: "{{ wimpy_aws_elb_listeners }}"
+    stickiness: "{{ wimpy_aws_elb_stickiness }}"
     health_check: "{{ wimpy_aws_elb_health_check }}"
   register: wimpy_elb_result
