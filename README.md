@@ -133,9 +133,9 @@ wimpy_aws_elb_listeners:
 
 # ELB Stickiness. Disabled by default.
 wimpy_aws_elb_stickiness:
-  - enabled: yes
-    type: application
-    cookie: SESSIONID
+  enabled: yes
+  type: application
+  cookie: SESSIONID
 
 
 wimpy_aws_instance_type: t2.small # EC2 instance type
