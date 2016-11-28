@@ -31,6 +31,11 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
+    dns_ttl = template.add_parameter(Parameter(
+        "TTL",
+        Type="String",
+    ))
+
     loadbalancersecuritygroup = template.add_parameter(Parameter(
         "LoadBalancerSecurityGroup",
         Type="CommaDelimitedList",
@@ -169,7 +174,7 @@ def generate_cloudformation_template():
         HostedZoneName=Join("", [Ref(hostedzone), "."]),
         Name=Join("", [Ref(dns_record), ".", Ref(hostedzone), "."]),
         Type="CNAME",
-        TTL="300",
+        TTL=Ref(dns_ttl),
         ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
     ))
 

@@ -23,6 +23,7 @@
       LoadBalancerSecurityGroup: "{{' ,'.join(wimpy_aws_elb_security_groups) }}"
       HostedZoneName: "{{ wimpy_aws_hosted_zone_name }}"
       DNSRecord: "{{ wimpy_aws_dns_name }}"
+      TTL: "{{ wimpy_dns_ttl }}"
       HealthCheckGracePeriod: "{{ wimpy_asg_healthcheck_grace_period }}"
       LoadBalancerHealthCheckTarget: "HTTP:80/"
       LoadBalancerHealthyThreshold: 2
