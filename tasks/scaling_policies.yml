@@ -6,7 +6,7 @@
     name: "{{ item.name }}"
     region: "{{ wimpy_aws_region }}"
     adjustment_type: "{{ item.adjustment_type }}" # ChangeInCapacity | ExactCapacity | PercentChangeInCapacity
-    asg_name: "{{ autoscaling.stack_outputs.AutoScalingGroup }}"
+    asg_name: "{{ auto_scaling_group.stack_outputs.AutoScalingGroup }}"
     scaling_adjustment: "{{ item.scaling_adjustment }}"
     min_adjustment_step: 1
     cooldown: "{{ item.cooldown }}"

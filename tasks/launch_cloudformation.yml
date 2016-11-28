@@ -24,3 +24,7 @@
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
   register: autoscaling
+
+- set_fact:
+    auto_scaling_group: "{{ autoscaling }}"
+  when: autoscaling.changed
