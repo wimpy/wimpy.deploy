@@ -78,7 +78,7 @@ wimpy_alarm_metrics:
 # - new_asg: old instances stay alive, new stack is created
 wimpy_deploy_strategy: "rolling_asg"
 
-wimpy_dns_ttl: "{{ wimpy_dns_ttl }}|default(300)" # DNS record Time To Live
+wimpy_dns_ttl: 300 # DNS record Time To Live
 
 wimpy_needs_elb: false # Whether or not to assign an ELB in front of the ASG instances
 
