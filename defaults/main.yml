@@ -108,6 +108,7 @@ wimpy_aws_elb_listeners:
 
 wimpy_aws_elb_stickiness:
   enabled: no
+  type: loadbalancer
 
 wimpy_aws_instance_type: t2.small # EC2 instance type
 
