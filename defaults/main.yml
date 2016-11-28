@@ -106,6 +106,9 @@ wimpy_aws_elb_listeners:
     load_balancer_port: "80"
     instance_port: "{{ wimpy_app_port }}"
 
+wimpy_aws_elb_stickiness:
+  - enabled: no
+
 wimpy_aws_instance_type: t2.small # EC2 instance type
 
 #role_instance_profile: "ansible-deploy" # When commented out, role set to instances. Role needs to exists

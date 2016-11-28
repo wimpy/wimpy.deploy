@@ -131,6 +131,12 @@ wimpy_aws_elb_listeners:
     load_balancer_port: "80"
     instance_port: "{{ wimpy_app_port }}"
 
+# ELB Stickiness. Disabled by default.
+wimpy_aws_elb_stickiness:
+  - enabled: yes
+    type: application
+    cookie: SESSIONID
+
 
 wimpy_aws_instance_type: t2.small # EC2 instance type
 
