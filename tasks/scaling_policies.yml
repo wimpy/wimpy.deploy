@@ -31,5 +31,5 @@
     alarm_actions: "{{ item[1]['arn'] }}"
   when: "'{{item[1].name}}' == '{{item[0].scaling_policy_name}}'"
   with_nested:
-    - wimpy_alarm_metrics
-    - sp_result.results
+    - "{{ wimpy_alarm_metrics }}"
+    - "{{ sp_result.results }}"
