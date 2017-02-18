@@ -21,6 +21,9 @@ wimpy_aws_asg_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_asg_healthcheck_grace_period: 300
 wimpy_high_cpu_threshold: 85
 wimpy_low_cpu_threshold: 20
+wimpy_asg_signal_count: 1
+wimpy_asg_signal_timeout: PT3M
+wimpy_asg_min_successful_instances_percent: 100
 
 wimpy_scaling_policies:
   - name: "{{ wimpy_project_name }}-cpu-high"
@@ -89,6 +92,8 @@ wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. 
 wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
 wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
+wimpy_aws_elb_enable_draining: True
+wimpy_aws_elb_draining_timeout: 30
 
 # ELB Healthcheck
 wimpy_aws_elb_health_check:
@@ -134,7 +139,7 @@ wimpy_user_data: |-
       owner: core:core
       permissions: 0644
       content: |
-        "{{ lookup('file', wimpy_dockerfile) | replace(wimpy_docker_image_name, wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}"
+        {{ lookup('file', wimpy_dockerfile) | replace(wimpy_docker_image_name, wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}
   coreos:
     units:
       - name: "{{ wimpy_project_name }}.service"
@@ -147,8 +152,9 @@ wimpy_user_data: |-
           [Service]
           User=core
           Restart=always
-          ExecStart=-/opt/bin/docker-compose -f /home/core/docker-compose.yml up
-          ExecStop=-/opt/bin/docker-compose -f /home/core/docker-compose.yml down
+          ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
+          ExecStartPost=/usr/bin/docker run --rm mbabineau/cfn-bootstrap cfn-signal -e 0 --stack "{{ wimpy_project_name }}" --resource AutoscalingGroup --region "{{ wimpy_aws_region }}"
+          ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
           [Install]
           WantedBy=multi-user.target
       - name: install_docker_compose.service
@@ -162,4 +168,3 @@ wimpy_user_data: |-
           [Service]
           Type=oneshot
           ExecStart=/home/core/install_docker_compose
-

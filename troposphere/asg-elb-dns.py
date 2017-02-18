@@ -1,7 +1,7 @@
 from troposphere import Join, Output, GetAtt
 from troposphere import Parameter, Ref, Template
 from troposphere.autoscaling import AutoScalingGroup, Tag
-from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate
+from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, AutoScalingCreationPolicy, ResourceSignal
 import troposphere.elasticloadbalancing as elb
 from troposphere.route53 import RecordSetType
 
@@ -32,7 +32,8 @@ def generate_cloudformation_template():
     ))
 
     dns_ttl = template.add_parameter(Parameter(
-        "TTL",
+        "DNSTTL",
+        Default="300",
         Type="String",
     ))
 
@@ -59,6 +60,27 @@ def generate_cloudformation_template():
         "MaxScale",
         Type="String",
         Description="Maximum number of servers to keep in the ASG",
+    ))
+
+    signalcount = template.add_parameter(Parameter(
+        "SignalCount",
+        Default="1",
+        Type="String",
+        Description="Number of success signals CF must receive before it sets the status as CREATE_COMPLETE",
+    ))
+
+    signaltimeout = template.add_parameter(Parameter(
+        "SignalTimeout",
+        Default="PT5M",
+        Type="String",
+        Description="Time that CF waits for the number of signals that was specified in the Count property",
+    ))
+
+    minsuccessfulinstancespercent = template.add_parameter(Parameter(
+        "MinSuccessfulInstancesPercent",
+        Default="100",
+        Type="String",
+        Description="Specifies the % of instances in an ASG replacement update that must signal success for the update to succeed",
     ))
 
     environment = template.add_parameter(Parameter(
@@ -113,6 +135,18 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
+    enable_connection_draining = template.add_parameter(Parameter(
+        "LoadBalancerEnableConnectionDraining",
+        Type="String",
+        Default="True",
+    ))
+
+    connection_draining_timeout = template.add_parameter(Parameter(
+        "LoadBalancerConnectionDrainingTimeout",
+        Type="String",
+        Default="30",
+    ))
+
     launchconfigurationname = template.add_parameter(Parameter(
         "LaunchConfigurationName",
         Type="String",
@@ -121,8 +155,8 @@ def generate_cloudformation_template():
     loadbalancer = template.add_resource(elb.LoadBalancer(
         "LoadBalancer",
         ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
-            Enabled=True,
-            Timeout=30,
+            Enabled=Ref(enable_connection_draining),
+            Timeout=Ref(connection_draining_timeout),
         ),
         Subnets=Ref(subnet),
         HealthCheck=elb.HealthCheck(
@@ -160,11 +194,22 @@ def generate_cloudformation_template():
         VPCZoneIdentifier=Ref(subnet),
         HealthCheckType='ELB',
         HealthCheckGracePeriod=Ref(health_check_grace_period),
+        CreationPolicy=CreationPolicy(
+            ResourceSignal=ResourceSignal(
+                Count=Ref(signalcount),
+                Timeout=Ref(signaltimeout)
+            ),
+            AutoScalingCreationPolicy=AutoScalingCreationPolicy(
+                MinSuccessfulInstancesPercent=Ref(minsuccessfulinstancespercent)
+            )
+        ),
         UpdatePolicy=UpdatePolicy(
             AutoScalingRollingUpdate=AutoScalingRollingUpdate(
-                PauseTime='PT1M',
-                MinInstancesInService="1",
-                MaxBatchSize='1'
+                MaxBatchSize='1',
+                MinInstancesInService='1',
+                MinSuccessfulInstancesPercent=Ref(minsuccessfulinstancespercent),
+                PauseTime=Ref(signaltimeout),
+                WaitOnResourceSignals=True
             )
         )
     ))
@@ -178,6 +223,7 @@ def generate_cloudformation_template():
         ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
     ))
 
+    template.add_output(Output("StackName", Value=Ref(project_name), Description="Stack Name"))
     template.add_output(Output("DomainName", Value=Ref(route53record), Description="DNS to access the service"))
     template.add_output(Output("LoadBalancer", Value=GetAtt(loadbalancer, "DNSName"), Description="ELB dns"))
     template.add_output(

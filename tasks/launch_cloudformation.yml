@@ -20,6 +20,9 @@
       MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
       MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
       Subnets: "{{' ,'.join(wimpy_aws_asg_vpc_subnets) }}"
+      SignalCount: "{{ wimpy_asg_signal_count }}"
+      SignalTimeout: "{{ wimpy_asg_signal_timeout }}"
+      MinSuccessfulInstancesPercent: "{{ wimpy_asg_min_successful_instances_percent }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"

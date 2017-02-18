@@ -18,18 +18,23 @@
       MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
       MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
       Subnets: "{{' ,'.join(wimpy_aws_asg_vpc_subnets) }}"
+      SignalCount: "{{ wimpy_asg_signal_count }}"
+      SignalTimeout: "{{ wimpy_asg_signal_timeout }}"
+      MinSuccessfulInstancesPercent: "{{ wimpy_asg_min_successful_instances_percent }}"
       LoadBalancerName: "{{ wimpy_elb_name }}"
       LoadBalancerSchema: "{{ wimpy_aws_elb_scheme }}"
       LoadBalancerSecurityGroup: "{{' ,'.join(wimpy_aws_elb_security_groups) }}"
       HostedZoneName: "{{ wimpy_aws_hosted_zone_name }}"
       DNSRecord: "{{ wimpy_aws_dns_name }}"
-      TTL: "{{ wimpy_dns_ttl }}"
+      DNSTTL: "{{ wimpy_dns_ttl }}"
       HealthCheckGracePeriod: "{{ wimpy_asg_healthcheck_grace_period }}"
       LoadBalancerHealthCheckTarget: "HTTP:80/"
       LoadBalancerHealthyThreshold: 2
       LoadBalancerUnHealthyThreshold: 2
       LoadBalancerHealthCheckInterval: 10
       LoadBalancerHealthCheckTimeout: 5
+      LoadBalancerEnableConnectionDraining: "{{ wimpy_aws_elb_enable_draining }}"
+      LoadBalancerConnectionDrainingTimeout: "{{ wimpy_aws_elb_draining_timeout }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"

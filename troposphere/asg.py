@@ -1,7 +1,7 @@
 from troposphere import Output
 from troposphere import Parameter, Ref, Template
 from troposphere.autoscaling import AutoScalingGroup, Tag
-from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate
+from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, AutoScalingCreationPolicy, ResourceSignal
 
 __author__ = 'Jose Armesto'
 
@@ -43,6 +43,27 @@ def generate_cloudformation_template():
         Description="Maximum number of servers to keep in the ASG",
     ))
 
+    signalcount = template.add_parameter(Parameter(
+        "SignalCount",
+        Default="1",
+        Type="String",
+        Description="Number of success signals CF must receive before it sets the status as CREATE_COMPLETE",
+    ))
+
+    signaltimeout = template.add_parameter(Parameter(
+        "SignalTimeout",
+        Default="PT5M",
+        Type="String",
+        Description="Time that CF waits for the number of signals that was specified in the Count property",
+    ))
+
+    minsuccessfulinstancespercent = template.add_parameter(Parameter(
+        "MinSuccessfulInstancesPercent",
+        Default="100",
+        Type="String",
+        Description="Specifies the % of instances in an ASG replacement update that must signal success for the update to succeed",
+    ))
+
     environment = template.add_parameter(Parameter(
         "Environment",
         Type="String",
@@ -72,15 +93,27 @@ def generate_cloudformation_template():
         VPCZoneIdentifier=Ref(subnet),
         HealthCheckType='EC2',
         HealthCheckGracePeriod=Ref(health_check_grace_period),
+        CreationPolicy=CreationPolicy(
+            ResourceSignal=ResourceSignal(
+                Count=Ref(signalcount),
+                Timeout=Ref(signaltimeout)
+            ),
+            AutoScalingCreationPolicy=AutoScalingCreationPolicy(
+                MinSuccessfulInstancesPercent=Ref(minsuccessfulinstancespercent)
+            )
+        ),
         UpdatePolicy=UpdatePolicy(
             AutoScalingRollingUpdate=AutoScalingRollingUpdate(
-                PauseTime='PT1M',
-                MinInstancesInService="1",
-                MaxBatchSize='1'
+                MaxBatchSize='1',
+                MinInstancesInService='1',
+                MinSuccessfulInstancesPercent=Ref(minsuccessfulinstancespercent),
+                PauseTime=Ref(signaltimeout),
+                WaitOnResourceSignals=True
             )
         )
     ))
 
+    template.add_output(Output("StackName", Value=Ref(project_name), Description="Stack Name"))
     template.add_output(
         Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
     template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname),
