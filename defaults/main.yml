@@ -8,6 +8,7 @@ wimpy_docker_build_command: "docker build --tag {{ wimpy_docker_image_name }}:{{
 wimpy_dockerfile: "{{ playbook_dir }}/../docker-compose-{{ wimpy_deployment_environment }}.yml" # docker-compose file to use to start the app
 
 wimpy_aws_ami_name: "CoreOS-stable-*" # The latest version of this AMI name will be used
+wimpy_docker_compose_version: "1.11.1"
 
 wimpy_aws_dns_name: "{{ wimpy_project_name }}" # DNS record for the deployed instance
 
@@ -21,6 +22,9 @@ wimpy_aws_asg_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_asg_healthcheck_grace_period: 300
 wimpy_high_cpu_threshold: 85
 wimpy_low_cpu_threshold: 20
+wimpy_asg_signal_count: 1
+wimpy_asg_signal_timeout: PT3M
+wimpy_asg_min_successful_instances_percent: 100
 
 wimpy_scaling_policies:
   - name: "{{ wimpy_project_name }}-cpu-high"
@@ -89,6 +93,8 @@ wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. 
 wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
 wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
+wimpy_aws_elb_enable_draining: True
+wimpy_aws_elb_draining_timeout: 30
 
 # ELB Healthcheck
 wimpy_aws_elb_health_check:
@@ -128,13 +134,18 @@ wimpy_user_data: |-
       content: |
         #!/bin/sh
         mkdir -p /opt/bin
-        curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
+        curl -L https://github.com/docker/compose/releases/download/{{ wimpy_docker_compose_version }}/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
         chmod +x /opt/bin/docker-compose
     - path: /home/core/docker-compose.yml
       owner: core:core
       permissions: 0644
       content: |
-        "{{ lookup('file', wimpy_dockerfile) | replace(wimpy_docker_image_name, wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}"
+        {{ lookup('file', wimpy_dockerfile) | replace('image: ' + wimpy_docker_image_name, 'image: ' + wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}
+    - path: /home/core/healthcheck.sh
+      owner: core:core
+      permissions: 0744
+      content: |
+        {{ lookup('file', role_path + '/files/healthcheck.sh') | indent(6, False) }}
   coreos:
     units:
       - name: "{{ wimpy_project_name }}.service"
@@ -147,8 +158,9 @@ wimpy_user_data: |-
           [Service]
           User=core
           Restart=always
-          ExecStart=-/opt/bin/docker-compose -f /home/core/docker-compose.yml up
-          ExecStop=-/opt/bin/docker-compose -f /home/core/docker-compose.yml down
+          ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
+          ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_project_name }}" AutoscalingGroup "{{ wimpy_aws_region }}"
+          ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
           [Install]
           WantedBy=multi-user.target
       - name: install_docker_compose.service
@@ -162,4 +174,3 @@ wimpy_user_data: |-
           [Service]
           Type=oneshot
           ExecStart=/home/core/install_docker_compose
-
