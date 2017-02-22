@@ -18,11 +18,13 @@ trap cfn-signal EXIT
 
 sleep 5 # It takes compose a few seconds to create the container
 
+CONTAINER_NAME=$(/opt/bin/docker-compose -f /home/core/docker-compose.yml ps | tail -n 1 | cut -f 1 -d" ")
+
 # If no healthcheck has been defined, use regular container status
-if [[ $(docker inspect ${STACK_NAME} | jq '.[].State.Health|length') == 0 ]]; then
+if [[ $(docker inspect ${CONTAINER_NAME} | jq '.[].State.Health|length') == 0 ]]; then
   while [ "$RETRIES" -le "$MAX_RETRIES" ]; do
     echo '.'
-    if [[ $(docker inspect ${STACK_NAME} | jq '.[].State.Status') == '"running"' ]]; then
+    if [[ $(docker inspect ${CONTAINER_NAME} | jq '.[].State.Status') == '"running"' ]]; then
       exit 0
     fi
     RETRIES=$((RETRIES+1))
@@ -31,7 +33,7 @@ if [[ $(docker inspect ${STACK_NAME} | jq '.[].State.Health|length') == 0 ]]; th
 else # Otherwise, check the health check status
   while [ "$RETRIES" -le "$MAX_RETRIES" ]; do
     printf '.'
-    if [[ $(docker inspect ${STACK_NAME} | jq '.[].State.Health.Status') == '"healthy"' ]]; then
+    if [[ $(docker inspect ${CONTAINER_NAME} | jq '.[].State.Health.Status') == '"healthy"' ]]; then
       exit 0
     fi
     RETRIES=$((RETRIES+1))
