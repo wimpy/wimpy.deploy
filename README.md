@@ -58,7 +58,7 @@ Traditionally, `wimpy_release_version` will contain the new version pushed to th
 
 ## Authentication
 ### AWS
-This role expects to be runned on a server with a IAM Instance Role with permissions to create and modify AWS resources.
+This role expects to be run on a server with a IAM Instance Role with permissions to create and modify AWS resources.
 
 ```bash
 $ ansible-playbook -i preprod deploy.yml --extra-vars "wimpy_release_version=2.3 wimpy_deployment_environment=preprod"
@@ -71,7 +71,7 @@ $ ansible-playbook -i global_pre_hosts deploy.yml --extra-vars "boto_profile=pro
 ```
 
 ### Docker Registry
-Currently, Docker only way to authenticate a request to a Docker Registry is using the docker login command. These playbooks will place the config file that Docker generates whenever you login in the command line. A "deploy" user should be created to make it easier to deploy from a CI server.
+Currently, the only way to authenticate a request to a Docker Registry is using the docker login command. These playbooks will place the config file that Docker generates whenever you login in the command line. A "deploy" user should be created to make it easier to deploy from a CI server.
 
 ## Environments
 The `wimpy_deployment_environment` variable is used to determine which file from your repository to pass to `docker-compose`. Typically, you'd have a different `docker-compose` file for each environment.
