@@ -152,6 +152,12 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
+    new_weight = template.add_parameter(Parameter(
+        "NewDnsWeight",
+        Type="String",
+        Default="100",
+    ))
+
     loadbalancer = template.add_resource(elb.LoadBalancer(
         "LoadBalancer",
         ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
@@ -222,7 +228,7 @@ def generate_cloudformation_template():
         SetIdentifier=Ref(project_name),
         TTL=Ref(dns_ttl),
         Type="CNAME",
-        Weight=100,
+        Weight=Ref(new_weight),
     ))
 
     template.add_output(Output("StackName", Value=Ref(project_name), Description="Stack Name"))
