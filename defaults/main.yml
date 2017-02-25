@@ -83,7 +83,7 @@ wimpy_alarm_metrics:
 wimpy_deploy_strategy: "rolling_asg"
 
 wimpy_dns_ttl: 300 # DNS record Time To Live
-wimpy_new_dns_weight: 100 # DNS record weight
+wimpy_new_dns_weight: 10 # DNS record weight
 
 wimpy_needs_elb: false # Whether or not to assign an ELB in front of the ASG instances
 
