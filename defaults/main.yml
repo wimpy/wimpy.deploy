@@ -25,6 +25,7 @@ wimpy_low_cpu_threshold: 20
 wimpy_asg_signal_count: 1
 wimpy_asg_signal_timeout: PT3M
 wimpy_asg_min_successful_instances_percent: 100
+wimpy_destroy_previous_asg: True
 
 wimpy_scaling_policies:
   - name: "{{ wimpy_project_name }}-cpu-high"
@@ -82,7 +83,7 @@ wimpy_alarm_metrics:
 # - new_asg: old instances stay alive, new stack is created
 wimpy_deploy_strategy: "rolling_asg"
 
-wimpy_dns_ttl: 300 # DNS record Time To Live
+wimpy_dns_ttl: 60 # DNS record Time To Live
 wimpy_new_dns_weight: 10 # DNS record weight
 
 wimpy_needs_elb: false # Whether or not to assign an ELB in front of the ASG instances

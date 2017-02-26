@@ -1,0 +1,13 @@
+---
+
+- name: "Waiting some seconds before removing previous CloudFormation"
+  pause:
+    seconds: "{{ wimpy_dns_ttl * 2 }}"
+
+- name: "Remove previous CloudFormation"
+  cloudformation:
+    profile: "{{ boto_profile | default(omit) }}"
+    region: "{{ wimpy_aws_region }}"
+    stack_name: "{{ item.tags | selectattr('key', 'equalto', 'Name') | map(attribute='value') | join(',')}}"
+    state: "absent"
+  with_items: "{{ previous_asgs.results }}"

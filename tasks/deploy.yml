@@ -5,6 +5,9 @@
 - include: find_latest_ami.yml
   when: wimpy_aws_ami_id is undefined
 
+- include: find_previous_cloudformation.yml
+  when: wimpy_destroy_previous_asg
+
 - include: create_launchconfiguration.yml
 
 - include: launch_cloudformation_with_elb_dns.yml
@@ -14,3 +17,8 @@
   when: not wimpy_needs_elb
 
 - include: scaling_policies.yml
+
+- include: clean_previous_cloudformation.yml
+  when:
+    - wimpy_destroy_previous_asg
+    - previous_asgs.results | count > 0
