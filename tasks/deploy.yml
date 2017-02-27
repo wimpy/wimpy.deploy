@@ -19,6 +19,5 @@
 - include: scaling_policies.yml
 
 - include: clean_previous_cloudformation.yml
-  when:
-    - wimpy_destroy_previous_asg
-    - previous_asgs.results | count > 0
+  with_items: "{{ previous_asgs.results }}"
+  when: wimpy_destroy_previous_asg
