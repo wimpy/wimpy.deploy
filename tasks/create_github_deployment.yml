@@ -1,0 +1,30 @@
+---
+
+- name: "Create Github deployment"
+  uri:
+    url: "{{ github_deployments_api }}"
+    method: POST
+    headers:
+      Authorization: "Token {{ wimpy_github_token }}"
+      Content-Type: "application/json"
+    body:
+      ref: "{{ wimpy_release_version }}"
+      environment: "{{ wimpy_deployment_environment }}"
+      description: "Deployment by Wimpy"
+    status_code: 201
+    body_format: json
+  register: github_deployment
+
+- name: "Pending Deployment status"
+  uri:
+    url: "{{ github_deployments_api }}/{{ github_deployment.json.id }}/statuses"
+    method: POST
+    headers:
+      Authorization: "Token {{ wimpy_github_token }}"
+      Content-Type: "application/json"
+    body:
+      state: "pending"
+      target_url: ""
+      description: "Deployment started"
+    body_format: json
+    status_code: 201
