@@ -59,3 +59,39 @@ coreos:
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/home/core/install_docker_compose
+
+    - name: download_existing_ssl_certificates.service
+      command: "start"
+      content: |
+        [Unit]
+        Description=Download already issued SSL Certificates from S3
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/docker run --rm xueshanf/awscli aws s3 sync --no-follow-symlinks "s3://{{ wimpy_ssl_s3_bucket }}/" /home/core/ssl_certificates --region "{{ wimpy_aws_region }}"'
+    - name: certbot.service
+      command: "start"
+      content: |
+        [Unit]
+        Description=Renew SSL Certificates and upload to S3
+        After=download_existing_ssl_certificates.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/docker run --rm -v "/home/core/ssl_certificates:/var/dehydrated" -e "AWS_REGION={{ wimpy_aws_region }}" -e "S3_BUCKET_NAME={{ wimpy_ssl_s3_bucket }}" dehydrated-route53 --cron --domain "{{ wimpy_aws_dns_name }}.{{ wimpy_aws_hosted_zone_name }}"
+        ExecStartPost=/usr/bin/systemctl restart "{{ wimpy_project_name }}.service"
+    - name: certbot.timer
+      command: "start"
+      content: |
+        [Unit]
+        Description=Daily renewal of Let's Encrypt's certificates
+        Requires=docker.service
+
+        [Timer]
+        OnCalendar=hourly
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
