@@ -1,0 +1,9 @@
+- name: "get ssl certified"
+  iam_server_certificate_facts:
+      profile: "{{ boto_profile | default(omit) }}"
+      region: "{{ wimpy_aws_region }}"
+      name: "{{ wimpy_ssl_cert_name }}"
+  register: wimpy_ssl_cert
+
+- set_fact:
+      wimpy_arn_ssl_cert: "{{ wimpy_ssl_cert['results'][wimpy_ssl_cert_name]['arn'] }}"

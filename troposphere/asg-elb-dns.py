@@ -1,5 +1,5 @@
 from troposphere import Join, Output, GetAtt
-from troposphere import Parameter, Ref, Template
+from troposphere import Parameter, Ref, Template, If, Condition
 from troposphere.autoscaling import AutoScalingGroup, Tag
 from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, AutoScalingCreationPolicy, ResourceSignal
 import troposphere.elasticloadbalancing as elb
@@ -152,6 +152,16 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
+    sslcertarn = template.add_parameter(Parameter(
+        "SslCertArn",
+        Type="String",
+        Default=""
+    ))
+
+    condtions = {
+        "SSLCertificate": {"Fn::Not": [{"Fn::Equals": [{"Ref": "sslcertarn"}, ""]}]}
+    }
+
     loadbalancer = template.add_resource(elb.LoadBalancer(
         "LoadBalancer",
         ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
@@ -178,6 +188,13 @@ def generate_cloudformation_template():
         SecurityGroups=Ref(loadbalancersecuritygroup),
         LoadBalancerName=Ref(loadbalancername),
         Scheme=Ref(elb_schema),
+
+        SSLCertificateId=If(
+            "SSLCertificate",
+            Ref(sslcertarn),
+            Ref("AWS::NoValue")
+            )
+
     ))
 
     autoscalinggroup = template.add_resource(AutoScalingGroup(

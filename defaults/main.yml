@@ -14,6 +14,8 @@ wimpy_aws_dns_name: "{{ wimpy_project_name }}" # DNS record for the deployed ins
 
 wimpy_aws_region: "eu-west-1"
 
+wimpy_ssl_cert_name: "" # Your SSL cert name
+
 # Auto Scaling Group parameters
 wimpy_aws_autoscalinggroup_min_size: 1
 wimpy_aws_autoscalinggroup_max_size: 2
@@ -94,7 +96,6 @@ wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connectio
 wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
 wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_aws_elb_enable_draining: True
-wimpy_aws_elb_draining_timeout: 30
 
 # ELB Healthcheck
 wimpy_aws_elb_health_check:

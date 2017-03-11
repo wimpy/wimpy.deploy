@@ -35,6 +35,7 @@
       LoadBalancerHealthCheckTimeout: 5
       LoadBalancerEnableConnectionDraining: "{{ wimpy_aws_elb_enable_draining }}"
       LoadBalancerConnectionDrainingTimeout: "{{ wimpy_aws_elb_draining_timeout }}"
+      SslCertArn: "{{ wimpy_arn_ssl_cert }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
