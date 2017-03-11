@@ -18,6 +18,9 @@ write_files:
     permissions: 0744
     content: |
       {{ lookup('file', role_path + '/files/healthcheck.sh') | indent(6, False) }}
+  - path: "/home/core/ssl_certificates"
+    permissions: '0600'
+    owner: core:core
 coreos:
   units:
     - name: "{{ wimpy_project_name }}.service"
@@ -80,7 +83,7 @@ coreos:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/docker run --rm -v "/home/core/ssl_certificates:/var/dehydrated" -e "AWS_REGION={{ wimpy_aws_region }}" -e "S3_BUCKET_NAME={{ wimpy_ssl_s3_bucket }}" dehydrated-route53 --cron --domain "{{ wimpy_aws_dns_name }}.{{ wimpy_aws_hosted_zone_name }}"
+        ExecStart=/usr/bin/docker run --rm -v "/home/core/ssl_certificates:/var/dehydrated" -e "AWS_REGION={{ wimpy_aws_region }}" -e "S3_BUCKET_NAME={{ wimpy_ssl_s3_bucket }}" fiunchinho/dehydrated-route53-s3 --cron --domain "{{ wimpy_aws_dns_name }}.{{ wimpy_aws_hosted_zone_name }}"
         ExecStartPost=/usr/bin/systemctl restart "{{ wimpy_project_name }}.service"
     - name: certbot.timer
       command: "start"
@@ -90,7 +93,7 @@ coreos:
         Requires=docker.service
 
         [Timer]
-        OnCalendar=hourly
+        OnCalendar=weekly
         Persistent=true
 
         [Install]
