@@ -4,6 +4,6 @@
 wimpy_elb_result:
   elb:
 
-wimpy_elb_name_to_sanitize: "{{ wimpy_project_name }}-{{ wimpy_release_version }}"
+wimpy_elb_name_to_sanitize: "{{ wimpy_project_name }}-{{ ansible_date_time.epoch }}"
 wimpy_elb_name: "{{ wimpy_elb_name_to_sanitize | regex_replace('[^a-zA-Z0-9]', '-') }}"
 wimpy_asg_name: "{{ wimpy_elb_name }}"

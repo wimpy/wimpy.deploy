@@ -25,6 +25,7 @@ wimpy_low_cpu_threshold: 20
 wimpy_asg_signal_count: 1
 wimpy_asg_signal_timeout: PT3M
 wimpy_asg_min_successful_instances_percent: 100
+wimpy_destroy_previous_asg: True
 
 wimpy_scaling_policies:
   - name: "{{ wimpy_project_name }}-cpu-high"
@@ -82,7 +83,8 @@ wimpy_alarm_metrics:
 # - new_asg: old instances stay alive, new stack is created
 wimpy_deploy_strategy: "rolling_asg"
 
-wimpy_dns_ttl: 300 # DNS record Time To Live
+wimpy_dns_ttl: 60 # DNS record Time To Live
+wimpy_new_dns_weight: 10 # DNS record weight
 
 wimpy_needs_elb: false # Whether or not to assign an ELB in front of the ASG instances
 
@@ -94,7 +96,6 @@ wimpy_aws_elb_draining_timeout: 10 # Wait a specified timeout allowing connectio
 wimpy_cross_az_load_balancing: "no" # Distribute load across all configured Availability Zones
 wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_aws_elb_enable_draining: True
-wimpy_aws_elb_draining_timeout: 30
 
 # ELB Healthcheck
 wimpy_aws_elb_health_check:
@@ -158,8 +159,9 @@ wimpy_user_data: |-
           [Service]
           User=core
           Restart=always
+          ExecStartPre=/usr/bin/docker pull {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
           ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
-          ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_project_name }}" AutoscalingGroup "{{ wimpy_aws_region }}"
+          ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}"
           ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
           [Install]
           WantedBy=multi-user.target

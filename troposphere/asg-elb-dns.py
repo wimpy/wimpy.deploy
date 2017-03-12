@@ -152,6 +152,12 @@ def generate_cloudformation_template():
         Type="String",
     ))
 
+    new_weight = template.add_parameter(Parameter(
+        "NewDnsWeight",
+        Type="String",
+        Default="100",
+    ))
+
     loadbalancer = template.add_resource(elb.LoadBalancer(
         "LoadBalancer",
         ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
@@ -215,12 +221,14 @@ def generate_cloudformation_template():
     ))
 
     route53record = template.add_resource(RecordSetType(
-        "myDNSRecord",
+        "DNS",
         HostedZoneName=Join("", [Ref(hostedzone), "."]),
         Name=Join("", [Ref(dns_record), ".", Ref(hostedzone), "."]),
-        Type="CNAME",
-        TTL=Ref(dns_ttl),
         ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
+        SetIdentifier=Ref(project_name),
+        TTL=Ref(dns_ttl),
+        Type="CNAME",
+        Weight=Ref(new_weight),
     ))
 
     template.add_output(Output("StackName", Value=Ref(project_name), Description="Stack Name"))

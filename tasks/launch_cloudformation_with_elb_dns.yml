@@ -6,12 +6,12 @@
 
 - name: "Creates CloudFormation with ELB, ASG and Route53 DNS"
   cloudformation:
-    stack_name: "{{ wimpy_project_name }}"
+    stack_name: "{{ wimpy_asg_name }}"
     state: present
     region: "{{ wimpy_aws_region }}"
     template: "/tmp/cloudformation.json"
     template_parameters:
-      Name: "{{ wimpy_project_name }}"
+      Name: "{{ wimpy_asg_name }}"
       LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
       ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
@@ -27,6 +27,7 @@
       HostedZoneName: "{{ wimpy_aws_hosted_zone_name }}"
       DNSRecord: "{{ wimpy_aws_dns_name }}"
       DNSTTL: "{{ wimpy_dns_ttl }}"
+      NewDnsWeight: "{{ wimpy_new_dns_weight }}"
       HealthCheckGracePeriod: "{{ wimpy_asg_healthcheck_grace_period }}"
       LoadBalancerHealthCheckTarget: "HTTP:80/"
       LoadBalancerHealthyThreshold: 2
