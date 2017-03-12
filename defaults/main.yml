@@ -120,15 +120,15 @@ wimpy_aws_elb_stickiness:
 
 wimpy_aws_instance_type: t2.small # EC2 instance type
 
-# Github
-github_url_parts: "{{ wimpy_github_project_url.split('/') }}"
-github_proto: "{{ github_url_parts[0] | default('') | regex_replace(':', '') }}"
-github_host: "{{ github_url_parts[2] | default('')  }}"
-github_vendor: "{{ github_url_parts[3] | default('')  }}"
-github_name: "{{ github_url_parts[4] | default('') }}"
-github_project: "{{ github_vendor ~ '/' ~ github_name }}"
-github_api: "{{ ( github_host == 'github.com' ) | ternary('https://api.github.com', github_proto ~ '://' ~ github_host ~ '/api/v3') }}"
-github_deployments_api: "{{ ( github_name != '' ) | ternary(github_api ~ '/repos/' ~ github_project ~ '/deployments','') }}"
+# Github deployments
+wimpy_github_url_parts: "{{ wimpy_github_project_url.split('/') }}"
+wimpy_github_proto: "{{ wimpy_github_url_parts[0] | default('') | regex_replace(':', '') }}"
+wimpy_github_host: "{{ wimpy_github_url_parts[2] | default('')  }}"
+wimpy_github_vendor: "{{ wimpy_github_url_parts[3] | default('')  }}"
+wimpy_github_name: "{{ wimpy_github_url_parts[4] | default('') }}"
+wimpy_github_project: "{{ wimpy_github_vendor ~ '/' ~ wimpy_github_name }}"
+wimpy_github_api: "{{ ( wimpy_github_host == 'github.com' ) | ternary('https://api.github.com', wimpy_github_proto ~ '://' ~ wimpy_github_host ~ '/api/v3') }}"
+wimpy_github_deployments_api: "{{ ( wimpy_github_name != '' ) | ternary(wimpy_github_api ~ '/repos/' ~ wimpy_github_project ~ '/deployments','') }}"
 
 #role_instance_profile: "ansible-deploy" # When commented out, role set to instances. Role needs to exists
 
