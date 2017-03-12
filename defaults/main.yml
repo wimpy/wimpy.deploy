@@ -1,6 +1,7 @@
 ---
 
-wimpy_project_name: "{{ wimpy_project | regex_replace('[^a-zA-Z0-9]', '-') }}"
+wimpy_project_name: "{{ wimpy_project_name | regex_replace('[^a-zA-Z0-9]', '-') }}"
+wimpy_github_project_url: ""
 
 wimpy_docker_image_name: "{{ wimpy_project_name }}" # Name of the docker image that will be created
 wimpy_docker_image_version: "{{ (wimpy_release_version == 'master') | ternary('latest',wimpy_release_version) | string }}" # Version of the docker image to push.
@@ -118,6 +119,16 @@ wimpy_aws_elb_stickiness:
   type: loadbalancer
 
 wimpy_aws_instance_type: t2.small # EC2 instance type
+
+# Github deployments
+wimpy_github_url_parts: "{{ wimpy_github_project_url.split('/') }}"
+wimpy_github_proto: "{{ wimpy_github_url_parts[0] | default('') | regex_replace(':', '') }}"
+wimpy_github_host: "{{ wimpy_github_url_parts[2] | default('')  }}"
+wimpy_github_vendor: "{{ wimpy_github_url_parts[3] | default('')  }}"
+wimpy_github_name: "{{ wimpy_github_url_parts[4] | default('') }}"
+wimpy_github_project: "{{ wimpy_github_vendor ~ '/' ~ wimpy_github_name }}"
+wimpy_github_api: "{{ ( wimpy_github_host == 'github.com' ) | ternary('https://api.github.com', wimpy_github_proto ~ '://' ~ wimpy_github_host ~ '/api/v3') }}"
+wimpy_github_deployments_api: "{{ ( wimpy_github_name != '' ) | ternary(wimpy_github_api ~ '/repos/' ~ wimpy_github_project ~ '/deployments','') }}"
 
 #role_instance_profile: "ansible-deploy" # When commented out, role set to instances. Role needs to exists
 

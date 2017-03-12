@@ -1,0 +1,19 @@
+---
+
+- name: "Update Github Deployment status"
+  uri:
+    url: "{{ wimpy_github_deployments_api }}/{{ wimpy_github_deployment_out.json.id }}/statuses"
+    method: POST
+    headers:
+      Authorization: "Token {{ wimpy_github_token }}"
+      Content-Type: "application/json"
+    body:
+      state: "success"
+      target_url: ""
+      description: "Deployment finished successfully"
+    status_code: 201
+    body_format: json
+  when:
+    - wimpy_github_project_url != ''
+    - wimpy_github_deployment_out|succeeded
+  ignore_errors: yes

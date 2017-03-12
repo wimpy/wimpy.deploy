@@ -8,6 +8,9 @@
 - include: find_previous_cloudformation.yml
   when: wimpy_destroy_previous_asg
 
+- include: create_github_deployment.yml
+  when: wimpy_github_project_url != ''
+
 - include: create_launchconfiguration.yml
 
 - include: launch_cloudformation_with_elb_dns.yml
@@ -21,3 +24,5 @@
 - include: clean_previous_cloudformation.yml
   with_items: "{{ previous_asgs.results }}"
   when: wimpy_destroy_previous_asg
+
+- include: notify.yml
