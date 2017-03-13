@@ -158,9 +158,9 @@ def generate_cloudformation_template():
         Default=""
     ))
 
-    condtions = {
-        "SSLCertificate": {"Fn::Not": [{"Fn::Equals": [{"Ref": "sslcertarn"}, ""]}]}
-    }
+    sslcertificate = template.add_condition(
+        "SSLCertificate", Not(Equals(Ref("sslcertarn"(, ""))))
+    )
 
     loadbalancer = template.add_resource(elb.LoadBalancer(
         "LoadBalancer",
@@ -188,9 +188,8 @@ def generate_cloudformation_template():
         SecurityGroups=Ref(loadbalancersecuritygroup),
         LoadBalancerName=Ref(loadbalancername),
         Scheme=Ref(elb_schema),
-
         SSLCertificateId=If(
-            "SSLCertificate",
+            sslcertificate,
             Ref(sslcertarn),
             Ref("AWS::NoValue")
             )
