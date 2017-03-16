@@ -1,5 +1,11 @@
 ---
 
+- name: "Render cloud-config"
+  template:
+    src: templates/cloud_config.j2
+    dest: /tmp/cloud_config_{{ 99999999 | random | to_uuid }}
+  register: cloud_config_file
+
 - name: "Create new Launch Configuration"
   ec2_lc:
     profile: "{{ boto_profile | default(omit) }}"
@@ -16,7 +22,7 @@
     ebs_optimized: "{{ wimpy_ebs_optimized | default(omit) }}"
     volumes: "{{ wimpy_volumes | default(omit) }}"
     assign_public_ip: "{{ wimpy_assign_public_ip | default(omit) }}"
-    user_data: "{{ wimpy_user_data }}"
+    user_data: "{{ lookup('file', cloud_config_file.dest) }}"
   register: lc_result
 
 - set_fact:

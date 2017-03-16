@@ -1,0 +1,61 @@
+#cloud-config
+write_files:
+  - path: /home/core/install_docker_compose
+    owner: core:core
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      mkdir -p /opt/bin
+      curl -L https://github.com/docker/compose/releases/download/{{ wimpy_docker_compose_version }}/docker-compose-Linux-x86_64 > /opt/bin/docker-compose
+      chmod +x /opt/bin/docker-compose
+  - path: /home/core/docker-compose.yml
+    owner: core:core
+    permissions: 0644
+    content: |
+      {{ lookup('file', wimpy_dockerfile) | replace('image: ' + wimpy_docker_image_name, 'image: ' + wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}
+  - path: /home/core/healthcheck.sh
+    owner: core:core
+    permissions: 0744
+    content: |
+      {{ lookup('file', role_path + '/files/healthcheck.sh') | indent(6, False) }}
+coreos:
+  units:
+    - name: "{{ wimpy_project_name }}.service"
+      command: "start"
+      content: |
+        [Unit]
+        Description={{ wimpy_project_name }} container
+        After=install_docker_compose.service
+        Requires=install_docker_compose.service
+
+        [Service]
+        User=core
+        Restart=always
+{% for env_name, env_value in wimpy_app.environment %}
+        Environment={{ env_name }}={{ env_value }}
+{% endfor %}
+{% for pre_cmd in wimpy_app.pre_commands %}
+        ExecStartPre={{ pre_cmd }}
+{% endfor %}
+{% for post_cmd in wimpy_app.post_commands %}
+        ExecStartPost={{ post_cmd }}
+{% endfor %}
+        ExecStartPre=/usr/bin/docker pull {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
+        ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
+        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}"
+        ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: install_docker_compose.service
+      command: "start"
+      content: |
+        [Unit]
+        Description=Install docker-compose
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        ExecStart=/home/core/install_docker_compose
