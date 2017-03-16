@@ -138,6 +138,6 @@ wimpy_github_deployments_api: "{{ ( wimpy_github_name != '' ) | ternary(wimpy_gi
 #
 # Systemd unit executes docker-compose up
 wimpy_app:
-  environment: []
+  environment: {}
   pre_commands: []
   post_commands: []
