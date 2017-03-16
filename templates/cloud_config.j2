@@ -31,8 +31,8 @@ coreos:
         [Service]
         User=core
         Restart=always
-{% for env_name, env_value in wimpy_app.environment %}
-        Environment={{ env_name }}={{ env_value }}
+{% for env_key, env_value in wimpy_app.environment.items() %}
+        Environment={{ env_key }}={{ env_value }}
 {% endfor %}
 {% for pre_cmd in wimpy_app.pre_commands %}
         ExecStartPre={{ pre_cmd }}
