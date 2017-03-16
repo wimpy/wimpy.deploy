@@ -24,9 +24,9 @@
 - include: scaling_policies.yml
 
 - include: clean_previous_cloudformation.yml
-  with_items: "{{ previous_asgs.results }}"
   when:
     - wimpy_destroy_previous_asg
     - wimpy_deploy_strategy != "rolling_asg"
+  with_items: "{{ previous_asgs.results }}"
 
 - include: notify.yml
