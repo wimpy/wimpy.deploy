@@ -6,7 +6,9 @@
   when: wimpy_aws_ami_id is undefined
 
 - include: find_previous_cloudformation.yml
-  when: wimpy_destroy_previous_asg
+  when:
+    - wimpy_destroy_previous_asg
+    - wimpy_deploy_strategy != rolling_asg
 
 - include: create_github_deployment.yml
   when: wimpy_github_project_url != ''
@@ -23,6 +25,8 @@
 
 - include: clean_previous_cloudformation.yml
   with_items: "{{ previous_asgs.results }}"
-  when: wimpy_destroy_previous_asg
+  when:
+    - wimpy_destroy_previous_asg
+    - wimpy_deploy_strategy != rolling_asg
 
 - include: notify.yml
