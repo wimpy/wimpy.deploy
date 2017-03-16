@@ -18,7 +18,7 @@ trap cfn-signal EXIT
 
 sleep 5 # It takes compose a few seconds to create the container
 
-CONTAINER_NAME=$(/opt/bin/docker-compose -f /home/core/docker-compose.yml ps | tail -n 1 | cut -f 1 -d" ")
+CONTAINER_NAME=$(/opt/bin/docker-compose -f /home/core/docker-compose.yml ps | head -n 3 | tail -n 1 | cut -f 1 -d" ")
 
 # If no healthcheck has been defined, use regular container status
 if [[ $(docker inspect ${CONTAINER_NAME} | jq '.[].State.Health|length') == 0 ]]; then
