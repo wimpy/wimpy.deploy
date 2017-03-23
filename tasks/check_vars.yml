@@ -8,7 +8,6 @@
     - wimpy_release_version
     - wimpy_deployment_environment
     - wimpy_aws_vpc_id
-    - wimpy_aws_keypair
     - wimpy_aws_hosted_zone_name
     - wimpy_aws_elb_security_groups
     - wimpy_vpc_subnets

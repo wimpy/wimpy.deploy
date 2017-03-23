@@ -48,13 +48,13 @@ The only required parameters that have no default values are:
 - wimpy_release_version: "2.5" # Version being deployed
 - wimpy_deployment_environment: "preprod" # Environment where to deploy
 - wimpy_aws_vpc_id: "vpc-123456" # AWS VPC to use
-- wimpy_aws_keypair: "authentication" # Key pair to put on EC2 instances
 - wimpy_aws_hosted_zone_name: "example.com" # Hosted zone where to create the DNS record for your project
 - wimpy_aws_elb_security_groups: ["sg-asd234sa"]
 - wimpy_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
 - wimpy_aws_lc_security_groups: ["sg-asd234sa", "sg-ifufd34sa"]
 ```
 Traditionally, `wimpy_release_version` will contain the new version pushed to the repository that is being built on Jenkins.
+If you want to use specified key.pem you have to set `wimpy_aws_keypair`.  
 
 ## Authentication
 ### AWS
