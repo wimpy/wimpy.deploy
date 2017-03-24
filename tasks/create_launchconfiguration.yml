@@ -11,7 +11,7 @@
     profile: "{{ boto_profile | default(omit) }}"
     name: "{{ wimpy_project_name }}-{{ wimpy_release_version }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
     image_id: "{{ wimpy_aws_ami_id }}"
-    key_name: "{{ wimpy_aws_keypair }}"
+    key_name: "{{ wimpy_aws_keypair | default(omit) }}"
     region: "{{ wimpy_aws_region }}"
     security_groups: "{{ wimpy_aws_lc_security_groups }}"
     instance_type: "{{ wimpy_aws_instance_type }}"
