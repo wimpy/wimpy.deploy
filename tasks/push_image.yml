@@ -1,0 +1,22 @@
+---
+
+- name: "Log into private registry"
+  docker_login:
+    registry: "{{ wimpy_docker_registry }}"
+    email: "{{ wimpy_docker_registry_email | default(omit) }}"
+    username: "{{ wimpy_docker_registry_username | default(omit) }}"
+    password: "{{ wimpy_docker_registry_password | default(omit) }}"
+    reauthorize: yes
+  when:
+    - docker_build.changed
+    - wimpy_docker_registry_password is defined
+
+- name: "Log into AWS ECR"
+  shell: $(docker run --rm xueshanf/awscli aws ecr get-login --region {{ wimpy_aws_region }} --registry-ids={{ wimpy_aws_account_id }})
+  when:
+    - docker_build.changed
+    - wimpy_aws_account_id is defined
+
+- name: "Push docker image to registry"
+  shell: "docker push {{ wimpy_docker_image_name }}:{{ wimpy_docker_image_version }}"
+  when: docker_build.changed

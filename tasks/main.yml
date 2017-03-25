@@ -4,7 +4,7 @@
 
 - include: "{{ wimpy_before_build_tasks_file | default('empty.yml') }}"
 
-- include: build_docker_image.yml
+- include: build.yml
 
 - include: "{{ wimpy_before_deploy_tasks_file | default('empty.yml') }}"
 
@@ -13,3 +13,5 @@
 - include: "{{ wimpy_after_deploy_tasks_file | default('empty.yml') }}"
 
 - include: clean_launchconfigurations.yml
+
+- include: notify.yml

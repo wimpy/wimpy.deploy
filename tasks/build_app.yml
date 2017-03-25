@@ -1,0 +1,8 @@
+---
+
+- stat: path=/tmp/code-{{ project_name }}/docker-compose-build.yml
+  register: docker_compose_build
+
+- name: "Build app's code with docker-compose if docker-compose-build.yml exists"
+  shell: "docker-compose -f docker-compose-build.yml up"
+  when: docker_compose_build.stat.exists

@@ -28,5 +28,3 @@
   when:
     - wimpy_destroy_previous_asg
     - wimpy_deploy_strategy != "rolling_asg"
-
-- include: notify.yml
