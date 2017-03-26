@@ -1,6 +1,6 @@
 ---
 
-- stat: path=/tmp/code-{{ project_name }}/docker-compose-build.yml
+- stat: path="{{ lookup('env','PWD') }}/docker-compose-build.yml"
   register: docker_compose_build
 
 - name: "Build app's code with docker-compose if docker-compose-build.yml exists"
