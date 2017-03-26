@@ -3,9 +3,9 @@
 wimpy_project_name: "{{ wimpy_project | regex_replace('[^a-zA-Z0-9]', '-') }}"
 wimpy_github_project_url: ""
 
-wimpy_docker_image_name: "{{ wimpy_project_name }}" # Name of the docker image that will be created
+wimpy_docker_image_name: "{{ wimpy_docker_registry }}{{ wimpy_project_name }}" # Name of the docker image that will be created
 wimpy_docker_image_version: "{{ (wimpy_release_version == 'master') | ternary('latest',wimpy_release_version) | string }}" # Version of the docker image to push.
-wimpy_docker_registry: "{{ wimpy_aws_account_id ~ '.dkr.ecr.' ~ wimpy_aws_region ~ '.amazonaws.com' if wimpy_aws_account_id is defined else 'https://index.docker.io/v1/' }}"
+wimpy_docker_registry: "{{ wimpy_aws_account_id ~ '.dkr.ecr.' ~ wimpy_aws_region ~ '.amazonaws.com/' if wimpy_aws_account_id is defined else '' }}"
 wimpy_docker_build_command: "docker build --tag {{ wimpy_docker_image_name }}:{{ wimpy_docker_image_version }} \"{{ lookup('env','PWD') }}\""
 wimpy_dockerfile: "{{ playbook_dir }}/../docker-compose-{{ wimpy_deployment_environment }}.yml" # docker-compose file to use to start the app
 
