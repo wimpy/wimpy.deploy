@@ -9,7 +9,7 @@
 
 - name: "Log into private registry"
   docker_login:
-    registry: "{{ wimpy_docker_registry | default('https://index.docker.io/v1/') }}"
+    registry: "{{ 'https://index.docker.io/v1/' if wimpy_docker_registry == '' else wimpy_docker_registry }}"
     email: "{{ wimpy_docker_registry_email | default(none) }}"
     username: "{{ wimpy_docker_registry_username | default('AWS') }}"
     password: "{{ wimpy_docker_registry_password | default((wimpy_aws_ecr_password.stdout | b64decode).split(':')[1] if wimpy_aws_ecr_password.changed else '') }}"
