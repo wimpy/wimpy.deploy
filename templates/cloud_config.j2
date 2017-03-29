@@ -29,6 +29,7 @@ coreos:
         Requires=install_docker_compose.service
 
         [Service]
+        TimeoutStartSec=500s
         User=core
         Restart=always
 {% for env_key, env_value in wimpy_app.environment.items() %}
