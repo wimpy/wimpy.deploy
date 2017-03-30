@@ -142,3 +142,4 @@ wimpy_app:
   environment: {}
   pre_commands: []
   post_commands: []
+  additional_units: []

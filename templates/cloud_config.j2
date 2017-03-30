@@ -60,3 +60,7 @@ coreos:
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/home/core/install_docker_compose
+
+{% for unit in wimpy_app.additional_units %}
+    {{ unit }}
+{% endfor %}
