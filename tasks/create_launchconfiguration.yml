@@ -2,8 +2,8 @@
 
 - name: "Render cloud-config"
   template:
-    src: templates/cloud_config.j2
-    dest: /tmp/cloud_config_{{ wimpy_deploy_id }}
+    src: "templates/cloud_config.j2"
+    dest: "/tmp/cloud_config_{{ wimpy_deploy_id }}.json"
   register: wimpy_aws_autoscaling_launch_configuration_user_data
 
 - name: "Create new Launch Configuration"
