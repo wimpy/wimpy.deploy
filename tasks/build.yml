@@ -1,5 +1,0 @@
----
-
-- include: build_app.yml
-- include: build_docker_image.yml
-- include: push_image.yml

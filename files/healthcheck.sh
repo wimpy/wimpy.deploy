@@ -4,7 +4,7 @@ STACK_NAME=$1
 RESOURCE_NAME=${2:-AutoscalingGroup}
 AWS_REGION=${3:-eu-west-1}
 MAX_RETRIES=${4:-10}
-RETRIES=2
+RETRIES=0
 SLEEP=10
 
 function cfn-signal() {

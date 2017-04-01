@@ -1,8 +1,3 @@
 ---
 
-# Needed for some weird check
-wimpy_elb_result:
-  elb:
-
 wimpy_elb_name: "{{ wimpy_project_name }}"
-wimpy_asg_name: "{{ wimpy_project_name }}"

@@ -3,27 +3,24 @@
 - name: "Render cloud-config"
   template:
     src: templates/cloud_config.j2
-    dest: /tmp/cloud_config_{{ 99999999 | random | to_uuid }}
-  register: cloud_config_file
+    dest: /tmp/cloud_config_{{ wimpy_deploy_id }}
+  register: wimpy_aws_autoscaling_launch_configuration_user_data
 
 - name: "Create new Launch Configuration"
   ec2_lc:
     profile: "{{ boto_profile | default(omit) }}"
-    name: "{{ wimpy_project_name }}-{{ wimpy_release_version }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
+    name: "{{ wimpy_launch_configuration_name }}"
     image_id: "{{ wimpy_aws_ami_id }}"
     key_name: "{{ wimpy_aws_keypair | default(omit) }}"
     region: "{{ wimpy_aws_region }}"
     security_groups: "{{ wimpy_aws_lc_security_groups }}"
     instance_type: "{{ wimpy_aws_instance_type }}"
-    instance_profile_name: "{{ wimpy_role_instance_profile | default(omit) }}"
-    ramdisk_id: "{{ wimpy_ramdisk_id | default(omit) }}"
-    spot_price: "{{ wimpy_spot_price | default(omit) }}"
-    instance_monitoring: "{{ wimpy_instance_monitoring | default(omit) }}"
-    ebs_optimized: "{{ wimpy_ebs_optimized | default(omit) }}"
-    volumes: "{{ wimpy_volumes | default(omit) }}"
-    assign_public_ip: "{{ wimpy_assign_public_ip | default(omit) }}"
-    user_data: "{{ lookup('file', cloud_config_file.dest) }}"
-  register: lc_result
-
-- set_fact:
-    wimpy_launch_config_name: "{{ lc_result.name }}"
+    instance_profile_name: "{{ wimpy_aws_instance_role | default(omit) }}"
+    ramdisk_id: "{{ wimpy_aws_ramdisk_id | default(omit) }}"
+    spot_price: "{{ wimpy_aws_spot_price | default(omit) }}"
+    instance_monitoring: "{{ wimpy_aws_instance_monitoring | default(omit) }}"
+    ebs_optimized: "{{ wimpy_aws_ebs_optimized | default(omit) }}"
+    volumes: "{{ wimpy_aws_volumes | default(omit) }}"
+    assign_public_ip: "{{ wimpy_aws_assign_public_ip | default(omit) }}"
+    user_data: "{{ lookup('file', wimpy_aws_autoscaling_launch_configuration_user_data.dest) }}"
+  register: wimpy_aws_autoscaling_launch_configuration
