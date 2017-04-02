@@ -23,7 +23,7 @@
     ttl: "{{ wimpy_aws_dns_ttl }}"
     type: "CNAME"
     value: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_outputs']['LoadBalancer'] }}"
-  when: wimpy_needs_elb
+  when: wimpy_aws_elb_enable
 
 - name: "Waiting some seconds before removing previous CloudFormation"
   pause:
