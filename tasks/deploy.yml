@@ -1,12 +1,10 @@
 ---
 
+- debug: msg="RANDOM"
 - include_vars: "vars/{{ wimpy_deploy_strategy }}.yml"
 
 - include: find_latest_ami.yml
   when: wimpy_aws_ami_id is undefined
-
-- include: get_ssl_certified.yml
-  when: wimpy_ssl_cert_name
 
 - include: create_launchconfiguration.yml
 

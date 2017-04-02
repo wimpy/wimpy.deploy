@@ -14,7 +14,7 @@ wimpy_aws_dns_name: "{{ wimpy_project_name }}" # DNS record for the deployed ins
 
 wimpy_aws_region: "eu-west-1"
 
-wimpy_ssl_cert_name: "" # Your SSL cert name
+wimpy_arn_ssl_cert: "" # Your SSL cert arn
 
 # Auto Scaling Group parameters
 wimpy_aws_autoscalinggroup_min_size: 1

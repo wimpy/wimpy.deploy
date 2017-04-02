@@ -1,5 +1,5 @@
 from troposphere import Join, Output, GetAtt
-from troposphere import Parameter, Ref, Template, If, Condition
+from troposphere import Parameter, Ref, Template, If, Condition, Equals, Not
 from troposphere.autoscaling import AutoScalingGroup, Tag
 from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, AutoScalingCreationPolicy, ResourceSignal
 import troposphere.elasticloadbalancing as elb
@@ -158,8 +158,9 @@ def generate_cloudformation_template():
         Default=""
     ))
 
+
     sslcertificate = template.add_condition(
-        "SSLCertificate", Not(Equals(Ref("sslcertarn"(, ""))))
+        "SSLCertificate", Not(Equals(Ref("sslcertarn", "")))
     )
 
     loadbalancer = template.add_resource(elb.LoadBalancer(
