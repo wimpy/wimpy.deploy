@@ -3,6 +3,7 @@
 wimpy_deploy_id: "{{ ansible_date_time.iso8601_micro | to_uuid }}"
 
 wimpy_launch_configuration_name: "{{ wimpy_elb_name }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
+wimpy_elb_name: "{{ ( wimpy_deploy_strategy == 'rolling_asg' ) | ternary(wimpy_project_name, wimpy_project_name ~ '-' ~ wimpy_release_version[:7]) }}"
 wimpy_asg_name: "{{ wimpy_elb_name }}"
 
 wimpy_github_url_parts: "{{ wimpy_github_repository.split('/') }}"

@@ -1,4 +1,0 @@
----
-
-wimpy_elb_name_to_sanitize: "{{ wimpy_project_name }}-{{ wimpy_release_version[:7] }} }}"
-wimpy_elb_name: "{{ wimpy_elb_name_to_sanitize | regex_replace('[^a-zA-Z0-9]', '-') }}"

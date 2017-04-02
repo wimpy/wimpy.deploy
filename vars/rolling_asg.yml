@@ -1,3 +1,0 @@
----
-
-wimpy_elb_name: "{{ wimpy_project_name }}"
