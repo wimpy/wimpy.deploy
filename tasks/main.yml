@@ -21,4 +21,6 @@
         (wimpy_project_name | regex_findall("(^-)") | length > 0) or
         (wimpy_project_name | regex_findall("(-$)") | length > 0)
 
+- include: "{{ wimpy_before_deploy_tasks_file | default('empty.yml') }}"
 - include: deploy.yml
+- include: "{{ wimpy_after_deploy_tasks_file | default('empty.yml') }}"
