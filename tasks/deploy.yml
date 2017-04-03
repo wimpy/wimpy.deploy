@@ -1,6 +1,5 @@
 ---
 
-- debug: msg="RANDOM"
 - include_vars: "vars/{{ wimpy_deploy_strategy }}.yml"
 
 - include: find_latest_ami.yml
