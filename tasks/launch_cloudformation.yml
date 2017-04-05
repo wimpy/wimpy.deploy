@@ -95,6 +95,12 @@
     scheme: "{{ wimpy_aws_elb_scheme }}"
     listeners: "{{ wimpy_aws_elb_listeners }}"
     stickiness: "{{ wimpy_aws_elb_stickiness }}"
-    health_check: "{{ wimpy_aws_elb_healthcheck }}"
+    health_check:
+      ping_protocol: "{{ wimpy_aws_elb_healthcheck_ping_protocol }}"
+      ping_path: "{{ wimpy_aws_elb_healthcheck_ping_path }}"
+      response_timeout: "{{ wimpy_aws_elb_healthcheck_response_timeout }}"
+      interval: "{{ wimpy_aws_elb_healthcheck_interval }}"
+      unhealthy_threshold: "{{ wimpy_aws_elb_healthcheck_unhealthy_threshold }}"
+      healthy_threshold: "{{ wimpy_aws_elb_healthcheck_healthy_threshold }}"
   register: wimpy_elb_result
   when: wimpy_aws_elb_enable
