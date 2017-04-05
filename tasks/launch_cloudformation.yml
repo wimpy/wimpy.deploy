@@ -46,6 +46,7 @@
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
       Version: "{{ wimpy_release_version }}"
+      Managed: "Wimpy"
   register: wimpy_aws_cloudformation_elb
   when: wimpy_aws_elb_enable
 
@@ -72,6 +73,7 @@
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
       Version: "{{ wimpy_release_version }}"
+      Managed: "Wimpy"
   register: wimpy_aws_cloudformation
   when: not wimpy_aws_elb_enable
 
