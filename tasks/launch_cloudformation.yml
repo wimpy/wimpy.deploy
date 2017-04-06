@@ -99,6 +99,7 @@
     stickiness: "{{ wimpy_aws_elb_stickiness }}"
     health_check:
       ping_protocol: "{{ wimpy_aws_elb_healthcheck_ping_protocol }}"
+      ping_port: "{{ wimpy_app_port }}"
       ping_path: "{{ wimpy_aws_elb_healthcheck_ping_path }}"
       response_timeout: "{{ wimpy_aws_elb_healthcheck_response_timeout }}"
       interval: "{{ wimpy_aws_elb_healthcheck_interval }}"
