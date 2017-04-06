@@ -1,14 +1,14 @@
 ---
 
 - set_fact:
-    previous_cf: "{{ item.tags | selectattr('key', 'equalto', 'Name') | map(attribute='value') | join(',')}}"
+    wimpy_previous_cf: "{{ item.tags | selectattr('key', 'equalto', 'Name') | map(attribute='value') | join(',')}}"
 
 - cloudformation_facts:
     profile: "{{ boto_profile | default(omit) }}"
     region: "{{ wimpy_aws_region }}"
-    stack_name: "{{ previous_cf }}"
+    stack_name: "{{ wimpy_previous_cf }}"
     all_facts: true
-  register: cf_facts
+  register: wimpy_aws_cloudformation_facts
 
 - name: "Delete ELB from DNS"
   route53:
@@ -18,20 +18,20 @@
     overwrite: True
     zone: "{{ wimpy_aws_hosted_zone_name }}"
     record: "{{ wimpy_aws_dns_name }}.{{ wimpy_aws_hosted_zone_name }}."
-    identifier: "{{ previous_cf }}"
+    identifier: "{{ wimpy_previous_cf }}"
     weight: "0"
-    ttl: "{{ wimpy_dns_ttl }}"
+    ttl: "{{ wimpy_aws_dns_ttl }}"
     type: "CNAME"
-    value: "{{ cf_facts['ansible_facts']['cloudformation'][previous_cf]['stack_outputs']['LoadBalancer'] }}"
-  when: wimpy_needs_elb
+    value: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_outputs']['LoadBalancer'] }}"
+  when: wimpy_aws_elb_enable
 
 - name: "Waiting some seconds before removing previous CloudFormation"
   pause:
-    seconds: "{{ wimpy_dns_ttl * 2 }}"
+    seconds: "{{ wimpy_aws_dns_ttl * 2 }}"
 
 - name: "Remove previous CloudFormation"
   cloudformation:
     profile: "{{ boto_profile | default(omit) }}"
     region: "{{ wimpy_aws_region }}"
-    stack_name: "{{ previous_cf }}"
+    stack_name: "{{ wimpy_previous_cf }}"
     state: "absent"

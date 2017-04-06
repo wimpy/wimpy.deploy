@@ -1,6 +1,0 @@
----
-
-- name: "Build docker image with app's code"
-  shell: "{{ wimpy_docker_build_command }}"
-  when: wimpy_docker_build_command != ""
-  register: docker_build

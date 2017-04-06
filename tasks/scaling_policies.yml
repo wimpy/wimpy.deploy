@@ -2,20 +2,20 @@
 
 - ec2_scaling_policy:
     profile: "{{ boto_profile | default(omit) }}"
-    state: present
+    state: "present"
     name: "{{ item.name }}"
     region: "{{ wimpy_aws_region }}"
     adjustment_type: "{{ item.adjustment_type }}" # ChangeInCapacity | ExactCapacity | PercentChangeInCapacity
-    asg_name: "{{ auto_scaling_group.stack_outputs.AutoScalingGroup }}"
+    asg_name: "{{ wimpy_aws_autoscaling.stack_outputs.AutoScalingGroup }}"
     scaling_adjustment: "{{ item.scaling_adjustment }}"
     min_adjustment_step: 1
     cooldown: "{{ item.cooldown }}"
-  register: "sp_result"
-  with_items: "{{ wimpy_scaling_policies }}"
+  register: "wimpy_aws_autoscaling_scaling_policies"
+  with_items: "{{ wimpy_aws_autoscaling_policies }}"
 
 - ec2_metric_alarm:
     profile: "{{ boto_profile | default(omit) }}"
-    state: present
+    state: "present"
     region: "{{ wimpy_aws_region }}"
     name: "{{ item[0].name }}"
     metric: "{{ item[0].metric }}"
@@ -31,5 +31,5 @@
     alarm_actions: "{{ item[1]['arn'] }}"
   when: "'{{item[1].name}}' == '{{item[0].scaling_policy_name}}'"
   with_nested:
-    - "{{ wimpy_alarm_metrics }}"
-    - "{{ sp_result.results }}"
+    - "{{ wimpy_aws_autoscaling_alarms }}"
+    - "{{ wimpy_aws_autoscaling_scaling_policies.results }}"

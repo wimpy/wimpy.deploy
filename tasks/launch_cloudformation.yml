@@ -1,33 +1,108 @@
 ---
 
 - name: "Rendering CloudFormation template"
-  shell: python {{ role_path }}/troposphere/asg.py > /tmp/cloudformation.json
+  shell: python {{ role_path }}/troposphere/asg-elb-dns.py > /tmp/cloudformation_{{ wimpy_deploy_id }}.json
   changed_when: false
+  when: wimpy_aws_elb_enable
+
+- name: "Rendering CloudFormation template"
+  shell: python {{ role_path }}/troposphere/asg.py > /tmp/cloudformation_{{ wimpy_deploy_id }}.json
+  changed_when: false
+  when: not wimpy_aws_elb_enable
+
+- name: "Creates CloudFormation with ELB, ASG and Route53 DNS"
+  cloudformation:
+    stack_name: "{{ wimpy_asg_name }}"
+    state: "present"
+    region: "{{ wimpy_aws_region }}"
+    template: "/tmp/cloudformation_{{ wimpy_deploy_id }}.json"
+    template_parameters:
+      Name: "{{ wimpy_asg_name }}"
+      LaunchConfigurationName: "{{ wimpy_launch_configuration_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"
+      ScaleCapacity: "{{ wimpy_aws_autoscaling_desired_capacity }}"
+      MinScale: "{{ wimpy_aws_autoscaling_min_size }}"
+      MaxScale: "{{ wimpy_aws_autoscaling_max_size }}"
+      Subnets: "{{' ,'.join(wimpy_aws_autoscaling_vpc_subnets) }}"
+      SignalCount: "{{ wimpy_aws_autoscaling_signal_count }}"
+      SignalTimeout: "{{ wimpy_aws_autoscaling_signal_timeout }}"
+      MinSuccessfulInstancesPercent: "{{ wimpy_aws_autoscaling_signal_min_successful }}"
+      LoadBalancerName: "{{ wimpy_elb_name }}"
+      LoadBalancerSchema: "{{ wimpy_aws_elb_scheme }}"
+      LoadBalancerSecurityGroup: "{{' ,'.join(wimpy_aws_elb_security_groups) }}"
+      HostedZoneName: "{{ wimpy_aws_hosted_zone_name }}"
+      DNSRecord: "{{ wimpy_aws_dns_name }}"
+      DNSTTL: "{{ wimpy_aws_dns_ttl }}"
+      NewDnsWeight: "{{ wimpy_aws_dns_weight }}"
+      HealthCheckGracePeriod: "{{ wimpy_aws_autoscaling_healthcheck_grace_period }}"
+      LoadBalancerHealthCheckTarget: "HTTP:80/"
+      LoadBalancerHealthyThreshold: 2
+      LoadBalancerUnHealthyThreshold: 2
+      LoadBalancerHealthCheckInterval: 10
+      LoadBalancerHealthCheckTimeout: 5
+      LoadBalancerEnableConnectionDraining: "{{ wimpy_aws_elb_enable_draining }}"
+      LoadBalancerConnectionDrainingTimeout: "{{ wimpy_aws_elb_draining_timeout }}"
+    tags:
+      Stack: "{{ wimpy_project_name }}"
+      Environment: "{{ wimpy_deployment_environment }}"
+      Version: "{{ wimpy_release_version }}"
+      Managed: "Wimpy"
+  register: wimpy_aws_cloudformation_elb
+  when: wimpy_aws_elb_enable
 
 - name: "Creates CloudFormation with ASG"
   cloudformation:
     profile: "{{ boto_profile | default(omit) }}"
     stack_name: "{{ wimpy_asg_name }}"
-    state: present
+    state: "present"
     region: "{{ wimpy_aws_region }}"
-    template: "/tmp/cloudformation.json"
+    template: "/tmp/cloudformation_{{ wimpy_deploy_id }}.json"
     template_parameters:
       Name: "{{ wimpy_asg_name }}"
-      LaunchConfigurationName: "{{ wimpy_launch_config_name }}"
+      LaunchConfigurationName: "{{ wimpy_launch_configuration_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
-      HealthCheckGracePeriod: "{{ wimpy_asg_healthcheck_grace_period }}"
-      ScaleCapacity: "{{ wimpy_aws_autoscalinggroup_desired_capacity }}"
-      MinScale: "{{ wimpy_aws_autoscalinggroup_min_size }}"
-      MaxScale: "{{ wimpy_aws_autoscalinggroup_max_size }}"
-      Subnets: "{{' ,'.join(wimpy_aws_asg_vpc_subnets) }}"
-      SignalCount: "{{ wimpy_asg_signal_count }}"
-      SignalTimeout: "{{ wimpy_asg_signal_timeout }}"
-      MinSuccessfulInstancesPercent: "{{ wimpy_asg_min_successful_instances_percent }}"
+      HealthCheckGracePeriod: "{{ wimpy_aws_autoscaling_healthcheck_grace_period }}"
+      ScaleCapacity: "{{ wimpy_aws_autoscaling_desired_capacity }}"
+      MinScale: "{{ wimpy_aws_autoscaling_min_size }}"
+      MaxScale: "{{ wimpy_aws_autoscaling_max_size }}"
+      Subnets: "{{' ,'.join(wimpy_aws_autoscaling_vpc_subnets) }}"
+      SignalCount: "{{ wimpy_aws_autoscaling_signal_count }}"
+      SignalTimeout: "{{ wimpy_aws_autoscaling_signal_timeout }}"
+      MinSuccessfulInstancesPercent: "{{ wimpy_aws_autoscaling_signal_min_successful }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
-  register: autoscaling
+      Version: "{{ wimpy_release_version }}"
+      Managed: "Wimpy"
+  register: wimpy_aws_cloudformation
+  when: not wimpy_aws_elb_enable
 
 - set_fact:
-    auto_scaling_group: "{{ autoscaling }}"
-  when: autoscaling.changed
+    wimpy_aws_autoscaling: "{{ wimpy_aws_cloudformation_elb }}"
+  when: wimpy_aws_cloudformation_elb.changed
+- set_fact:
+    wimpy_aws_autoscaling: "{{ wimpy_aws_cloudformation }}"
+  when: wimpy_aws_cloudformation.changed
+
+- name: "Configure Elastic Load Balancers"
+  ec2_elb_lb:
+    profile: "{{ boto_profile | default(omit) }}"
+    state: "present"
+    name: "{{ wimpy_elb_name }}"
+    region: "{{ wimpy_aws_region }}"
+    security_group_ids: "{{ wimpy_aws_elb_security_groups }}"
+    subnets: "{{ wimpy_aws_elb_vpc_subnets }}"
+    connection_draining_timeout: "{{ wimpy_aws_elb_draining_timeout }}"
+    cross_az_load_balancing: "{{ wimpy_aws_elb_cross_az }}"
+    scheme: "{{ wimpy_aws_elb_scheme }}"
+    listeners: "{{ wimpy_aws_elb_listeners }}"
+    stickiness: "{{ wimpy_aws_elb_stickiness }}"
+    health_check:
+      ping_protocol: "{{ wimpy_aws_elb_healthcheck_ping_protocol }}"
+      ping_path: "{{ wimpy_aws_elb_healthcheck_ping_path }}"
+      response_timeout: "{{ wimpy_aws_elb_healthcheck_response_timeout }}"
+      interval: "{{ wimpy_aws_elb_healthcheck_interval }}"
+      unhealthy_threshold: "{{ wimpy_aws_elb_healthcheck_unhealthy_threshold }}"
+      healthy_threshold: "{{ wimpy_aws_elb_healthcheck_healthy_threshold }}"
+  register: wimpy_elb_result
+  when: wimpy_aws_elb_enable

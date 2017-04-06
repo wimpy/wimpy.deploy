@@ -12,7 +12,7 @@ write_files:
     owner: core:core
     permissions: 0644
     content: |
-      {{ lookup('file', wimpy_dockerfile) | replace('image: ' + wimpy_docker_image_name, 'image: ' + wimpy_docker_image_name + ':' + wimpy_docker_image_version) | indent(6, False) }}
+      {{ lookup('file', wimpy_docker_compose_file) | replace('image: ' + wimpy_docker_image_name, 'image: ' + wimpy_docker_image_name + ':' + wimpy_release_version) | indent(6, False) }}
   - path: /home/core/healthcheck.sh
     owner: core:core
     permissions: 0744
@@ -29,21 +29,21 @@ coreos:
         Requires=install_docker_compose.service
 
         [Service]
-        TimeoutStartSec=500s
+        TimeoutStartSec={{ wimpy_service_start_timeout }}
         User=core
         Restart=always
-{% for env_key, env_value in wimpy_app.environment.items() %}
+{% for env_key, env_value in wimpy_application_environment_vars.items() %}
         Environment={{ env_key }}={{ env_value }}
 {% endfor %}
-{% for pre_cmd in wimpy_app.pre_commands %}
+{% for pre_cmd in wimpy_application_pre_commands %}
         ExecStartPre={{ pre_cmd }}
 {% endfor %}
-{% for post_cmd in wimpy_app.post_commands %}
+{% for post_cmd in wimpy_application_post_commands %}
         ExecStartPost={{ post_cmd }}
 {% endfor %}
         ExecStartPre=/usr/bin/docker pull {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
         ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
-        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}"
+        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_service_healthcheck_retries }}"
         ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
 
         [Install]
@@ -61,6 +61,6 @@ coreos:
         RemainAfterExit=true
         ExecStart=/home/core/install_docker_compose
 
-{% for unit in wimpy_app.additional_units %}
+{% for unit in wimpy_application_additional_units %}
     {{ unit }}
 {% endfor %}

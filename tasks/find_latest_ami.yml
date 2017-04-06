@@ -3,13 +3,13 @@
 - name: "Search for the latest AMI available"
   ec2_ami_find:
     profile: "{{ boto_profile | default(omit) }}"
-    name: "{{ wimpy_aws_ami_name }}"
+    name: "{{ wimpy_aws_ami }}"
     region: "{{ wimpy_aws_region }}"
-    sort: creationDate
-    sort_order: descending
+    sort: "creationDate"
+    sort_order: "descending"
     sort_end: 1
     no_result_action: fail
-  register: ami_result
+  register: wimpy_aws_latest_ami
 
 - set_fact:
-    wimpy_aws_ami_id: "{{ ami_result.results[0].ami_id }}"
+    wimpy_aws_ami_id: "{{ wimpy_aws_latest_ami.results[0].ami_id }}"

@@ -1,0 +1,16 @@
+---
+
+wimpy_deploy_id: "{{ ansible_date_time.iso8601_micro | to_uuid }}"
+
+wimpy_launch_configuration_name: "{{ wimpy_elb_name }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
+wimpy_elb_name: "{{ ( wimpy_deploy_strategy == 'rolling_asg' ) | ternary(wimpy_project_name, wimpy_project_name ~ '-' ~ wimpy_release_version[:7]) }}"
+wimpy_asg_name: "{{ wimpy_elb_name }}"
+
+wimpy_github_url_parts: "{{ wimpy_github_repository.split('/') }}"
+wimpy_github_proto: "{{ wimpy_github_url_parts[0] | default('') | regex_replace(':', '') }}"
+wimpy_github_host: "{{ wimpy_github_url_parts[2] | default('')  }}"
+wimpy_github_vendor: "{{ wimpy_github_url_parts[3] | default('')  }}"
+wimpy_github_name: "{{ wimpy_github_url_parts[4] | default('') }}"
+wimpy_github_project: "{{ wimpy_github_vendor ~ '/' ~ wimpy_github_name }}"
+wimpy_github_api: "{{ ( wimpy_github_host == 'github.com' ) | ternary('https://api.github.com', wimpy_github_proto ~ '://' ~ wimpy_github_host ~ '/api/v3') }}"
+wimpy_github_deployments_api: "{{ ( wimpy_github_name != '' ) | ternary(wimpy_github_api ~ '/repos/' ~ wimpy_github_project ~ '/deployments','') }}"

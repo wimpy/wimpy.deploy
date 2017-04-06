@@ -15,19 +15,6 @@
     body_format: json
   register: wimpy_github_deployment_out
   ignore_errors: yes
-
-- name: "Pending Deployment status"
-  uri:
-    url: "{{ wimpy_github_deployments_api }}/{{ wimpy_github_deployment_out.json.id }}/statuses"
-    method: POST
-    headers:
-      Authorization: "Token {{ wimpy_github_token }}"
-      Content-Type: "application/json"
-    body:
-      state: "pending"
-      target_url: ""
-      description: "Deployment started"
-    body_format: json
-    status_code: 201
-    ignore_errors: yes
-    when: wimpy_github_deployment_out|succeeded
+  when:
+    - wimpy_github_repository != ''
+    - wimpy_github_token is defined

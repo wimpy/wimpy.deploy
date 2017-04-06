@@ -1,8 +1,0 @@
-{
-  "auths": {
-    "https://index.docker.io/v1/": {
-      "auth": "{{ wimpy_dockerhub_auth }}",
-      "email": "{{ wimpy_dockerhub_email }}"
-    }
-  }
-}
