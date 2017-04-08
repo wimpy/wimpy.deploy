@@ -2,6 +2,7 @@
 
 wimpy_docker_compose_version: "1.11.1"
 wimpy_docker_compose_file: "{{ lookup('env','PWD') }}/docker-compose-{{ wimpy_deployment_environment }}.yml"
+wimpy_docker_compose_template: "templates/docker-compose.yml.j2"
 wimpy_deploy_strategy: "rolling_asg"
 wimpy_github_repository: ""
 wimpy_service_start_timeout: 500s

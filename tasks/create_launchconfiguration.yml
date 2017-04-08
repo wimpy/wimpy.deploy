@@ -1,5 +1,15 @@
 ---
 
+- stat:
+    path: "{{ wimpy_docker_compose_file }}"
+  register: wimpy_docker_compose_file_provided
+
+- name: "Render docker-compose file if none is provided"
+  template:
+    src: "{{ wimpy_docker_compose_template }}"
+    dest: "/tmp/docker-compose_{{ wimpy_deploy_id }}.yml"
+  when: not wimpy_docker_compose_file_provided.stat.exists
+
 - name: "Render cloud-config"
   template:
     src: "templates/cloud_config.j2"
