@@ -12,7 +12,11 @@ write_files:
     owner: core:core
     permissions: 0644
     content: |
+    {% if wimpy_docker_compose_file_provided.stat.exists %}
       {{ lookup('file', wimpy_docker_compose_file) | replace('image: ' + wimpy_docker_image_name, 'image: ' + wimpy_docker_image_name + ':' + wimpy_release_version) | indent(6, False) }}
+    {% else %}
+      {{ lookup('file', '/tmp/docker-compose_' ~ wimpy_deploy_id ~ '.yml') | indent(6, False) }}
+    {% endif %}
   - path: /home/core/healthcheck.sh
     owner: core:core
     permissions: 0744
