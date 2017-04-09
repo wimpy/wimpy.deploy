@@ -12,6 +12,7 @@
 
 - name: "Creates CloudFormation with ELB, ASG and Route53 DNS"
   cloudformation:
+    profile: "{{ boto_profile | default(omit) }}"
     stack_name: "{{ wimpy_asg_name }}"
     state: "present"
     region: "{{ wimpy_aws_region }}"
