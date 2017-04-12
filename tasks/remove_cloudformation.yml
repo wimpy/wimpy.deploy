@@ -9,6 +9,7 @@
     stack_name: "{{ wimpy_previous_cf }}"
     all_facts: true
   register: wimpy_aws_cloudformation_facts
+  when: wimpy_previous_cf != wimpy_asg_name
 
 - name: "Delete ELB from DNS"
   route53:
@@ -23,11 +24,15 @@
     ttl: "{{ wimpy_aws_dns_ttl }}"
     type: "CNAME"
     value: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_outputs']['LoadBalancer'] }}"
-  when: wimpy_aws_elb_enable
+  register: wimpy_disable_previous_elb_dns
+  when:
+    - wimpy_previous_cf != wimpy_asg_name
+    - wimpy_aws_elb_enable
 
 - name: "Waiting some seconds before removing previous CloudFormation"
   pause:
     seconds: "{{ wimpy_aws_dns_ttl * 2 }}"
+  when: wimpy_disable_previous_elb_dns.changed
 
 - name: "Remove previous CloudFormation"
   cloudformation:
@@ -35,3 +40,4 @@
     region: "{{ wimpy_aws_region }}"
     stack_name: "{{ wimpy_previous_cf }}"
     state: "absent"
+  when: wimpy_previous_cf != wimpy_asg_name
