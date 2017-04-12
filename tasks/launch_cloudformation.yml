@@ -37,11 +37,11 @@
       NewDnsWeight: "{{ wimpy_aws_dns_weight }}"
       HealthCheckGracePeriod: "{{ wimpy_aws_autoscaling_healthcheck_grace_period }}"
       LoadBalancerHealthCheckTarget: "HTTP:80/"
-      LoadBalancerHealthyThreshold: 2
-      LoadBalancerUnHealthyThreshold: 2
-      LoadBalancerHealthCheckInterval: 10
-      LoadBalancerHealthCheckTimeout: 5
-      LoadBalancerEnableConnectionDraining: "{{ wimpy_aws_elb_enable_draining }}"
+      LoadBalancerHealthyThreshold: "2"
+      LoadBalancerUnHealthyThreshold: "2"
+      LoadBalancerHealthCheckInterval: "10"
+      LoadBalancerHealthCheckTimeout: "5"
+      LoadBalancerEnableConnectionDraining: "{{ wimpy_aws_elb_enable_draining | string }}"
       LoadBalancerConnectionDrainingTimeout: "{{ wimpy_aws_elb_draining_timeout }}"
     tags:
       Stack: "{{ wimpy_project_name }}"
