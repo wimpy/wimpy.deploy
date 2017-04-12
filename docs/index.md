@@ -1,7 +1,8 @@
 ---
 layout: default
+title: Wimpy Deployments
 ---
 
-# [](#header-1)Welcome to Wimpy!
+# Welcome to Wimpy!
 
 Wimpy Docs
