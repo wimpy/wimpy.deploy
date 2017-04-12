@@ -24,6 +24,26 @@ write_files:
     permissions: 0744
     content: |
       {{ lookup('file', role_path + '/files/healthcheck.sh') | indent(6, False) }}
+
+  {% if wimpy_aws_cloudwatch_enabled -%}
+  - path: /home/core/cloudwatch.conf
+    owner: core:core
+    permissions: 0744
+    content: |
+      log_group = "/{{ wimpy_deployment_environment }}/{{ wimpy_project_name }}"
+      state_file = "/var/logs/journald-cloudwatch-logs/state"
+      log_priority = {{ wimpy_aws_logs_priority }}
+  - path: /home/core/install_cloudwatch_agent
+    owner: core:core
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      mkdir -p /opt/bin
+      mkdir -p /var/logs/journald-cloudwatch-logs/state
+      curl -L https://github.com/advantageous/systemd-cloud-watch/releases/download/v0.2.1/systemd-cloud-watch_linux > /opt/bin/journald-cloudwatch-logs
+      chmod +x /opt/bin/journald-cloudwatch-logs
+  {% endif %}
+
 coreos:
   units:
     - name: "{{ wimpy_project_name }}.service"
@@ -66,6 +86,39 @@ coreos:
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/home/core/install_docker_compose
+
+    {% if wimpy_aws_cloudwatch_enabled -%}
+    - name: install_cloudwatch_agent.service
+      command: "start"
+      content: |
+        [Unit]
+        Description=Install CloudWatch agent
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        ExecStart=/home/core/install_cloudwatch_agent
+
+    - name: cloudwatch.service
+      command: "start"
+      content: |
+        [Unit]
+        Description=journald-cloudwatch-logs
+        Wants=basic.target
+        After=basic.target network.target
+
+        [Service]
+        User=core
+        Group=core
+        ExecStart=/opt/bin/journald-cloudwatch-logs /home/core/cloudwatch.conf
+        KillMode=process
+        Restart=on-failure
+
+        [Install]
+        WantedBy=getty.target
+    {% endif %}
 
 {% for unit in wimpy_application_additional_units %}
     {{ unit }}

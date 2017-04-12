@@ -18,6 +18,10 @@ wimpy_application_pre_commands: []
 wimpy_application_post_commands: []
 wimpy_application_additional_units: []
 
+# CloudWatch logs
+wimpy_aws_cloudwatch_enabled: True
+wimpy_aws_logs_priority: 7
+
 # Route53
 wimpy_aws_dns_name: "{{ wimpy_project_name }}"
 wimpy_aws_dns_ttl: 60
