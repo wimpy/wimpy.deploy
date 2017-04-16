@@ -18,6 +18,6 @@ And you end up with
 
 ## Pipeline
 The pipeline has three main steps
-- [Packaging your application](building.md)
-- [Creating resources on your AWS account](deploy.md)
-- [Running your application inside EC2 instances](running.md)
+- [Packaging your application](building)
+- [Creating resources on your AWS account](deploy)
+- [Running your application inside EC2 instances](running)
