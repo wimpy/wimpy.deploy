@@ -24,11 +24,6 @@ Although you can also configure
 - `volumes`: Volumes attached to EC2 instances in the Auto Scaling Group. None by default.
 - `assign_public_ip`: Whether instances in the Auto Scaling group receive public IP addresses.
 
-### User Data
-When you launch an instance in Amazon EC2, you have the option of passing user data to the instance that can be used to perform common automated configuration tasks and even run scripts after the instance starts.
-User data is executed only at launch. If you stop an instance, modify the user data, and start the instance, the new user data is not executed automatically.
-
-[Cloud-init](https://cloudinit.readthedocs.io/en/latest/)
 
 ## A CloudFormation for all your resources
 You application is deployed using a CloudFormation stack that contains:
@@ -150,3 +145,5 @@ wimpy_aws_autoscaling_signal_timeout: "PT3M"
 # Specifies the percentage of instances in an Auto Scaling replacement update that must signal success for the update to succeed
 wimpy_aws_autoscaling_signal_min_successful: "100"
 ```
+
+You can learn how your application is started in the EC2 instances in the [Running your application](running.md) section.
