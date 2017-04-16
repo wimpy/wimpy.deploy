@@ -20,15 +20,17 @@ The docker-compose process is handled by [systemd](https://www.freedesktop.org/w
 You application is started using Docker Compose.
 This is the Docker Compose file used to start your application
 
+{% raw %}
 ```yaml
 version: '2'
 services:
-  {\{ wimpy_project_name }}:
-    image: {\{ wimpy_docker_image_name }}:{\{ wimpy_release_version }}
+  {{ wimpy_project_name }}:
+    image: {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
     ports:
-      - "{\{ wimpy_app_port }}:{\{ wimpy_app_port }}"
+      - "{{ wimpy_app_port }}:{{ wimpy_app_port }}"
 
 ```
+{% endraw %}
 
 But you can provide your own Docker Compose file for every environment where you want to deploy.
 If there is a file called `docker-compose-production.yml` in the root of your Git repository, Wimpy will use that one when deploying to the `production` environment.
