@@ -1,4 +1,4 @@
-title: Wimpy Deployments
-description: Wimpy is a set of Ansible roles to easily deploy your applications to AWS.
+title: Wimpy
+description: Easy resilient and scalable deployments in AWS
 show_downloads: true
 theme: jekyll-theme-cayman
