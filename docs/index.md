@@ -49,7 +49,7 @@ Now that we know basic Ansible jargon, a playbook to deploy our application coul
 - hosts: localhost
   connection: local
   vars:
-    wimpy_project_name: "spring-petclinic"
+    wimpy_project_name: "my-awesome-project"
     wimpy_app_port: "8080"
     wimpy_aws_region: "eu-west-1"
     wimpy_aws_vpc_id: "vpc-ed1cc588"
