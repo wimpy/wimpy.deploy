@@ -30,7 +30,6 @@ wimpy_aws_dns_weight: "10"
 # Elastic Load Balancer
 wimpy_aws_elb_enable: True # Whether or not to assign an ELB in front of the ASG instances
 wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
-wimpy_aws_elb_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_aws_elb_draining_timeout: "10" # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_aws_elb_enable_draining: "True"
 wimpy_aws_elb_cross_az: "no" # Distribute load across all configured Availability Zones
@@ -53,7 +52,6 @@ wimpy_aws_autoscaling_keep_launch_configurations: "1"
 wimpy_aws_autoscaling_min_size: "1"
 wimpy_aws_autoscaling_max_size: "2"
 wimpy_aws_autoscaling_desired_capacity: "1"
-wimpy_aws_autoscaling_vpc_subnets: "{{ wimpy_vpc_subnets }}"
 wimpy_aws_autoscaling_healthcheck_grace_period: "300"
 wimpy_aws_autoscaling_signal_count: "1"
 wimpy_aws_autoscaling_signal_timeout: "PT3M"

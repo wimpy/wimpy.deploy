@@ -10,7 +10,8 @@
     - wimpy_deployment_environment
     - wimpy_aws_vpc_id
     - wimpy_aws_hosted_zone_name
-    - wimpy_vpc_subnets
+    - wimpy_aws_autoscaling_vpc_subnets
+    - wimpy_aws_elb_vpc_subnets
     - wimpy_aws_elb_security_groups
     - wimpy_aws_lc_security_groups
 
