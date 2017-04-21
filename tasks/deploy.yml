@@ -1,7 +1,6 @@
 ---
 
 - include: find_latest_ami.yml
-  when: wimpy_aws_ami_id is undefined
 
 - include: find_previous_cloudformation.yml
 
@@ -11,7 +10,7 @@
 
 - include: create_launchconfiguration.yml
 
-- include: launch_cloudformation.yml
+- include: create_cloudformation_stack.yml
 
 - include: remove_cloudformation.yml
   with_items: "{{ wimpy_aws_autoscaling_previous.results | default([]) }}"
