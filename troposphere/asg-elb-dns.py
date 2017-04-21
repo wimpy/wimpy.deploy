@@ -18,6 +18,7 @@ def generate_cloudformation_template():
     input_alarms = ast.literal_eval(sys.argv[3])
 
     enable_elb = enable_elb == 'True'
+    elb_listeners = ast.literal_eval(sys.argv[4])
 
     template = Template()
 
@@ -93,6 +94,17 @@ def generate_cloudformation_template():
     ))
 
     if enable_elb:
+        elb_subnets = template.add_parameter(Parameter(
+            "LoadBalancerSubnets",
+            Type="CommaDelimitedList",
+        ))
+
+        elb_bucket_name = template.add_parameter(Parameter(
+            "LoadBalancerBucketName",
+            Type="String",
+            Description="S3 Bucket for the ELB access logs"
+        ))
+
         loadbalancername = template.add_parameter(Parameter(
             "LoadBalancerName",
             Type="String",
@@ -100,11 +112,6 @@ def generate_cloudformation_template():
 
         elb_schema = template.add_parameter(Parameter(
             "LoadBalancerSchema",
-            Type="String",
-        ))
-
-        health_check_target = template.add_parameter(Parameter(
-            "LoadBalancerHealthCheckTarget",
             Type="String",
         ))
 
@@ -169,32 +176,59 @@ def generate_cloudformation_template():
             Default="100",
         ))
 
+        health_check_protocol = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckProtocol",
+            Type="String",
+        ))
+
+        health_check_port = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckPort",
+            Type="String",
+        ))
+
+        health_check_path = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckPath",
+            Type="String",
+        ))
+
+        load_balancer_listeners = []
+        for listener in elb_listeners:
+            load_balancer_listeners.append(elb.Listener(
+                LoadBalancerPort=listener['load_balancer_port'],
+                InstancePort=listener['instance_port'],
+                Protocol=listener['protocol'],
+                InstanceProtocol=Ref(health_check_protocol),
+            ))
+
         loadbalancer = template.add_resource(elb.LoadBalancer(
             "LoadBalancer",
+            AccessLoggingPolicy=elb.AccessLoggingPolicy(
+                EmitInterval=60,
+                Enabled=True,
+                S3BucketName=Ref(elb_bucket_name),
+                S3BucketPrefix="ELBLogs"
+            ),
             ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
                 Enabled=Ref(enable_connection_draining),
                 Timeout=Ref(connection_draining_timeout),
             ),
-            Subnets=Ref(subnet),
+            Subnets=Ref(elb_subnets),
             HealthCheck=elb.HealthCheck(
-                Target=Ref(health_check_target),
+                Target=Join("", [Ref(health_check_protocol), ":", Ref(health_check_port), Ref(health_check_path)]),
                 HealthyThreshold=Ref(healthy_threshold),
                 UnhealthyThreshold=Ref(unhealthy_threshold),
                 Interval=Ref(health_check_interval),
                 Timeout=Ref(health_check_timeout),
             ),
-            Listeners=[
-                elb.Listener(
-                    LoadBalancerPort="80",
-                    InstancePort="80",
-                    Protocol="HTTP",
-                    InstanceProtocol="HTTP",
-                ),
-            ],
+            Listeners=load_balancer_listeners,
             CrossZone=True,
             SecurityGroups=Ref(loadbalancersecuritygroup),
             LoadBalancerName=Ref(loadbalancername),
             Scheme=Ref(elb_schema),
+            Tags=[
+                Tag("Name", Ref(project_name), True),
+                Tag("Environment", Ref(environment), True)
+            ]
         ))
 
         route53record = template.add_resource(RecordSetType(
@@ -256,7 +290,8 @@ def generate_cloudformation_template():
         }
         if scaling_policy['policy_type'] != "SimpleScaling" \
                 and 'estimated_instance_warmup' in scaling_policy:
-            policy_properties['EstimatedInstanceWarmup'] = scaling_policy['estimated_instance_warmup']
+            policy_properties['EstimatedInstanceWarmup'] = \
+                scaling_policy['estimated_instance_warmup']
 
         if scaling_policy['policy_type'] != "SimpleScaling" \
                 and 'metric_aggregation_type' in scaling_policy:
