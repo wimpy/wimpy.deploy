@@ -58,17 +58,20 @@ coreos:
         TimeoutStartSec={{ wimpy_service_start_timeout }}
         User=core
         Restart=always
+        Environment=KMS_MASTER_KEY={{ wimpy_aws_kms_key }}
+        Environment=S3_BUCKET={{ wimpy_aws_s3_application_bucket }}
 {% for env_key, env_value in wimpy_application_environment_vars.items() %}
         Environment={{ env_key }}={{ env_value }}
 {% endfor %}
+        ExecStartPre=/usr/bin/sh -c '/usr/bin/$(/usr/bin/docker run --rm xueshanf/awscli aws ecr get-login --region {{ wimpy_aws_region }})'
 {% for pre_cmd in wimpy_application_pre_commands %}
         ExecStartPre={{ pre_cmd }}
 {% endfor %}
+        ExecStartPre=/usr/bin/docker pull {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
+        ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
 {% for post_cmd in wimpy_application_post_commands %}
         ExecStartPost={{ post_cmd }}
 {% endfor %}
-        ExecStartPre=/usr/bin/docker pull {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
-        ExecStart=/opt/bin/docker-compose -f /home/core/docker-compose.yml up
         ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_service_healthcheck_retries }}"
         ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
 

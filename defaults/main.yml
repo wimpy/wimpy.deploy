@@ -27,6 +27,13 @@ wimpy_aws_dns_name: "{{ wimpy_project_name }}"
 wimpy_aws_dns_ttl: "60"
 wimpy_aws_dns_weight: "10"
 
+# KMS
+wimpy_aws_kms_key: ""
+
+# S3
+wimpy_aws_s3_application_bucket: ""
+wimpy_aws_s3_bucket: ""
+
 # Elastic Load Balancer
 wimpy_aws_elb_enable: True # Whether or not to assign an ELB in front of the ASG instances
 wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
