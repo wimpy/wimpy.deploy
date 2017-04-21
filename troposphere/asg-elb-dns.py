@@ -1,14 +1,24 @@
 from troposphere import Join, Output, GetAtt
 from troposphere import Parameter, Ref, Template
-from troposphere.autoscaling import AutoScalingGroup, Tag
-from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, AutoScalingCreationPolicy, ResourceSignal
+from troposphere.autoscaling import AutoScalingGroup, Tag, ScalingPolicy
+from troposphere.cloudwatch import Alarm, MetricDimension
+from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, \
+    AutoScalingCreationPolicy, ResourceSignal
 import troposphere.elasticloadbalancing as elb
 from troposphere.route53 import RecordSetType
+import sys
+import ast
 
 __author__ = 'Jose Armesto'
 
 
 def generate_cloudformation_template():
+    enable_elb = sys.argv[1]
+    input_scaling_policies = ast.literal_eval(sys.argv[2])
+    input_alarms = ast.literal_eval(sys.argv[3])
+
+    enable_elb = enable_elb == 'True'
+
     template = Template()
 
     template.add_description("""\
@@ -18,29 +28,6 @@ def generate_cloudformation_template():
         "Name",
         Type="String",
         Description="Instances will be tagged with this name",
-    ))
-
-    hostedzone = template.add_parameter(Parameter(
-        "HostedZoneName",
-        Description="The DNS name of an existing Amazon Route 53 hosted zone",
-        Type="String",
-    ))
-
-    dns_record = template.add_parameter(Parameter(
-        "DNSRecord",
-        Type="String",
-    ))
-
-    dns_ttl = template.add_parameter(Parameter(
-        "DNSTTL",
-        Default="300",
-        Type="String",
-    ))
-
-    loadbalancersecuritygroup = template.add_parameter(Parameter(
-        "LoadBalancerSecurityGroup",
-        Type="CommaDelimitedList",
-        Description="Security group for api app load balancer.",
     ))
 
     scalecapacity = template.add_parameter(Parameter(
@@ -66,21 +53,21 @@ def generate_cloudformation_template():
         "SignalCount",
         Default="1",
         Type="String",
-        Description="Number of success signals CF must receive before it sets the status as CREATE_COMPLETE",
+        Description="No. of signals CF must receive before it sets the status as CREATE_COMPLETE",
     ))
 
     signaltimeout = template.add_parameter(Parameter(
         "SignalTimeout",
         Default="PT5M",
         Type="String",
-        Description="Time that CF waits for the number of signals that was specified in the Count property",
+        Description="Time that CF waits for the number of signals that was specified in Count ",
     ))
 
     minsuccessfulinstancespercent = template.add_parameter(Parameter(
         "MinSuccessfulInstancesPercent",
         Default="100",
         Type="String",
-        Description="Specifies the % of instances in an ASG replacement update that must signal success for the update to succeed",
+        Description="% instances in a rolling update that must signal success for CF to succeed",
     ))
 
     environment = template.add_parameter(Parameter(
@@ -94,13 +81,8 @@ def generate_cloudformation_template():
         Type="CommaDelimitedList",
     ))
 
-    loadbalancername = template.add_parameter(Parameter(
-        "LoadBalancerName",
-        Type="String",
-    ))
-
-    elb_schema = template.add_parameter(Parameter(
-        "LoadBalancerSchema",
+    launchconfigurationname = template.add_parameter(Parameter(
+        "LaunchConfigurationName",
         Type="String",
     ))
 
@@ -110,81 +92,121 @@ def generate_cloudformation_template():
         Default="300",
     ))
 
-    health_check_target = template.add_parameter(Parameter(
-        "LoadBalancerHealthCheckTarget",
-        Type="String",
-    ))
+    if enable_elb:
+        loadbalancername = template.add_parameter(Parameter(
+            "LoadBalancerName",
+            Type="String",
+        ))
 
-    health_check_interval = template.add_parameter(Parameter(
-        "LoadBalancerHealthCheckInterval",
-        Type="String",
-    ))
+        elb_schema = template.add_parameter(Parameter(
+            "LoadBalancerSchema",
+            Type="String",
+        ))
 
-    health_check_timeout = template.add_parameter(Parameter(
-        "LoadBalancerHealthCheckTimeout",
-        Type="String",
-    ))
+        health_check_target = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckTarget",
+            Type="String",
+        ))
 
-    healthy_threshold = template.add_parameter(Parameter(
-        "LoadBalancerHealthyThreshold",
-        Type="String",
-    ))
+        health_check_interval = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckInterval",
+            Type="String",
+        ))
 
-    unhealthy_threshold = template.add_parameter(Parameter(
-        "LoadBalancerUnHealthyThreshold",
-        Type="String",
-    ))
+        health_check_timeout = template.add_parameter(Parameter(
+            "LoadBalancerHealthCheckTimeout",
+            Type="String",
+        ))
 
-    enable_connection_draining = template.add_parameter(Parameter(
-        "LoadBalancerEnableConnectionDraining",
-        Type="String",
-        Default="True",
-    ))
+        healthy_threshold = template.add_parameter(Parameter(
+            "LoadBalancerHealthyThreshold",
+            Type="String",
+        ))
 
-    connection_draining_timeout = template.add_parameter(Parameter(
-        "LoadBalancerConnectionDrainingTimeout",
-        Type="String",
-        Default="30",
-    ))
+        unhealthy_threshold = template.add_parameter(Parameter(
+            "LoadBalancerUnHealthyThreshold",
+            Type="String",
+        ))
 
-    launchconfigurationname = template.add_parameter(Parameter(
-        "LaunchConfigurationName",
-        Type="String",
-    ))
+        enable_connection_draining = template.add_parameter(Parameter(
+            "LoadBalancerEnableConnectionDraining",
+            Type="String",
+            Default="True",
+        ))
 
-    new_weight = template.add_parameter(Parameter(
-        "NewDnsWeight",
-        Type="String",
-        Default="100",
-    ))
+        connection_draining_timeout = template.add_parameter(Parameter(
+            "LoadBalancerConnectionDrainingTimeout",
+            Type="String",
+            Default="30",
+        ))
 
-    loadbalancer = template.add_resource(elb.LoadBalancer(
-        "LoadBalancer",
-        ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
-            Enabled=Ref(enable_connection_draining),
-            Timeout=Ref(connection_draining_timeout),
-        ),
-        Subnets=Ref(subnet),
-        HealthCheck=elb.HealthCheck(
-            Target=Ref(health_check_target),
-            HealthyThreshold=Ref(healthy_threshold),
-            UnhealthyThreshold=Ref(unhealthy_threshold),
-            Interval=Ref(health_check_interval),
-            Timeout=Ref(health_check_timeout),
-        ),
-        Listeners=[
-            elb.Listener(
-                LoadBalancerPort="80",
-                InstancePort="80",
-                Protocol="HTTP",
-                InstanceProtocol="HTTP",
+        loadbalancersecuritygroup = template.add_parameter(Parameter(
+            "LoadBalancerSecurityGroup",
+            Type="CommaDelimitedList",
+            Description="Security group for api app load balancer.",
+        ))
+
+        hostedzone = template.add_parameter(Parameter(
+            "HostedZoneName",
+            Description="The DNS name of an existing Amazon Route 53 hosted zone",
+            Type="String",
+        ))
+
+        dns_record = template.add_parameter(Parameter(
+            "DNSRecord",
+            Type="String",
+        ))
+
+        dns_ttl = template.add_parameter(Parameter(
+            "DNSTTL",
+            Default="300",
+            Type="String",
+        ))
+
+        new_weight = template.add_parameter(Parameter(
+            "NewDnsWeight",
+            Type="String",
+            Default="100",
+        ))
+
+        loadbalancer = template.add_resource(elb.LoadBalancer(
+            "LoadBalancer",
+            ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
+                Enabled=Ref(enable_connection_draining),
+                Timeout=Ref(connection_draining_timeout),
             ),
-        ],
-        CrossZone=True,
-        SecurityGroups=Ref(loadbalancersecuritygroup),
-        LoadBalancerName=Ref(loadbalancername),
-        Scheme=Ref(elb_schema),
-    ))
+            Subnets=Ref(subnet),
+            HealthCheck=elb.HealthCheck(
+                Target=Ref(health_check_target),
+                HealthyThreshold=Ref(healthy_threshold),
+                UnhealthyThreshold=Ref(unhealthy_threshold),
+                Interval=Ref(health_check_interval),
+                Timeout=Ref(health_check_timeout),
+            ),
+            Listeners=[
+                elb.Listener(
+                    LoadBalancerPort="80",
+                    InstancePort="80",
+                    Protocol="HTTP",
+                    InstanceProtocol="HTTP",
+                ),
+            ],
+            CrossZone=True,
+            SecurityGroups=Ref(loadbalancersecuritygroup),
+            LoadBalancerName=Ref(loadbalancername),
+            Scheme=Ref(elb_schema),
+        ))
+
+        route53record = template.add_resource(RecordSetType(
+            "DNS",
+            HostedZoneName=Join("", [Ref(hostedzone), "."]),
+            Name=Join("", [Ref(dns_record), ".", Ref(hostedzone), "."]),
+            ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
+            SetIdentifier=Ref(project_name),
+            TTL=Ref(dns_ttl),
+            Type="CNAME",
+            Weight=Ref(new_weight),
+        ))
 
     autoscalinggroup = template.add_resource(AutoScalingGroup(
         "AutoscalingGroup",
@@ -196,9 +218,7 @@ def generate_cloudformation_template():
         MinSize=Ref(minsize),
         MaxSize=Ref(maxsize),
         DesiredCapacity=Ref(scalecapacity),
-        LoadBalancerNames=[Ref(loadbalancer)],
         VPCZoneIdentifier=Ref(subnet),
-        HealthCheckType='ELB',
         HealthCheckGracePeriod=Ref(health_check_grace_period),
         CreationPolicy=CreationPolicy(
             ResourceSignal=ResourceSignal(
@@ -220,22 +240,74 @@ def generate_cloudformation_template():
         )
     ))
 
-    route53record = template.add_resource(RecordSetType(
-        "DNS",
-        HostedZoneName=Join("", [Ref(hostedzone), "."]),
-        Name=Join("", [Ref(dns_record), ".", Ref(hostedzone), "."]),
-        ResourceRecords=[GetAtt(loadbalancer, "DNSName")],
-        SetIdentifier=Ref(project_name),
-        TTL=Ref(dns_ttl),
-        Type="CNAME",
-        Weight=Ref(new_weight),
-    ))
+    autoscalinggroup.HealthCheckType = 'EC2'
+    if enable_elb:
+        autoscalinggroup.LoadBalancerNames = [Ref(loadbalancer)]
+        autoscalinggroup.HealthCheckType = 'ELB'
+
+    created_scaling_policies = dict()
+    for scaling_policy in input_scaling_policies:
+        policy_properties = {
+            'AdjustmentType': scaling_policy['adjustment_type'],
+            'AutoScalingGroupName': Ref(autoscalinggroup),
+            'Cooldown': scaling_policy['cooldown'],
+            'PolicyType': scaling_policy['policy_type'],
+            'ScalingAdjustment': scaling_policy['scaling_adjustment'],
+        }
+        if scaling_policy['policy_type'] != "SimpleScaling" \
+                and 'estimated_instance_warmup' in scaling_policy:
+            policy_properties['EstimatedInstanceWarmup'] = scaling_policy['estimated_instance_warmup']
+
+        if scaling_policy['policy_type'] != "SimpleScaling" \
+                and 'metric_aggregation_type' in scaling_policy:
+            policy_properties['MetricAggregationType'] = scaling_policy['metric_aggregation_type']
+
+        if scaling_policy['adjustment_type'] == "PercentChangeInCapacity" \
+                and 'min_adjustment_magnitude' in scaling_policy:
+            policy_properties['MinAdjustmentMagnitude'] = scaling_policy['min_adjustment_magnitude']
+
+        if 'step_adjustments' in scaling_policy:
+            policy_properties['StepAdjustments'] = scaling_policy['step_adjustments']
+
+        created_scaling_policies[scaling_policy['name']] = template.add_resource(ScalingPolicy(
+            scaling_policy['name'],
+            **policy_properties
+        ))
+
+    for alarm in input_alarms:
+        template.add_resource(
+            Alarm(
+                alarm['name'],
+                ActionsEnabled=True,
+                AlarmActions=[Ref(created_scaling_policies[alarm['scaling_policy_name']])],
+                AlarmDescription=alarm['description'],
+                ComparisonOperator=alarm['comparison'],
+                Dimensions=[
+                    MetricDimension(
+                        Name="AutoScalingGroupName",
+                        Value=Ref(autoscalinggroup)
+                    ),
+                ],
+                EvaluationPeriods=alarm['evaluation_periods'],
+                InsufficientDataActions=[],
+                MetricName=alarm['metric'],
+                Namespace=alarm['namespace'],
+                OKActions=[],
+                Period=alarm['period'],
+                Statistic=alarm['statistics'],
+                Threshold=str(alarm['threshold']),
+                Unit=alarm['unit'],
+            )
+        )
 
     template.add_output(Output("StackName", Value=Ref(project_name), Description="Stack Name"))
-    template.add_output(Output("DomainName", Value=Ref(route53record), Description="DNS to access the service"))
-    template.add_output(Output("LoadBalancer", Value=GetAtt(loadbalancer, "DNSName"), Description="ELB dns"))
-    template.add_output(
-        Output("AutoScalingGroup", Value=Ref(autoscalinggroup), Description="Created Auto Scaling Group"))
+    if enable_elb:
+        template.add_output(Output("DomainName", Value=Ref(route53record),
+                                   Description="DNS to access the service"))
+        template.add_output(Output("LoadBalancer", Value=GetAtt(loadbalancer, "DNSName"),
+                                   Description="ELB dns"))
+    template.add_output(Output("AutoScalingGroup", Value=Ref(autoscalinggroup),
+                               Description="Auto Scaling Group"))
     template.add_output(Output("LaunchConfiguration", Value=Ref(launchconfigurationname),
                                Description="LaunchConfiguration for this deploy"))
 

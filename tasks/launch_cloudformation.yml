@@ -1,14 +1,8 @@
 ---
 
 - name: "Rendering CloudFormation template"
-  shell: python {{ role_path }}/troposphere/asg-elb-dns.py > /tmp/cloudformation_{{ wimpy_deploy_id }}.json
+  shell: python {{ role_path }}/troposphere/asg-elb-dns.py "{{ wimpy_aws_elb_enable }}" "{{ wimpy_aws_autoscaling_policies }}" "{{ wimpy_aws_autoscaling_alarms }}" > /tmp/cloudformation_{{ wimpy_deploy_id }}.json
   changed_when: false
-  when: wimpy_aws_elb_enable
-
-- name: "Rendering CloudFormation template"
-  shell: python {{ role_path }}/troposphere/asg.py > /tmp/cloudformation_{{ wimpy_deploy_id }}.json
-  changed_when: false
-  when: not wimpy_aws_elb_enable
 
 - name: "Creates CloudFormation with ELB, ASG and Route53 DNS"
   cloudformation:

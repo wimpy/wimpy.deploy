@@ -13,8 +13,6 @@
 
 - include: launch_cloudformation.yml
 
-- include: scaling_policies.yml
-
 - include: remove_cloudformation.yml
   with_items: "{{ wimpy_aws_autoscaling_previous.results | default([]) }}"
 

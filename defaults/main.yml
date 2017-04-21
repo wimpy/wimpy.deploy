@@ -60,51 +60,43 @@ wimpy_aws_autoscaling_destroy_previous: True
 wimpy_aws_autoscaling_high_cpu_threshold: "85"
 wimpy_aws_autoscaling_low_cpu_threshold: "20"
 wimpy_aws_autoscaling_policies:
-  - name: "{{ wimpy_project_name }}-cpu-high"
+  - name: "ScalingPolicyCpuHigh"
+    adjustment_type: "ChangeInCapacity"
+    cooldown: 300
+    metric_aggregation_type: "Average"
+    policy_type: "SimpleScaling"
     scaling_adjustment: 1
-    cooldown: 300
+  - name: "ScalingPolicyCpuLow"
     adjustment_type: "ChangeInCapacity"
-
-  - name: "{{ wimpy_project_name }}-cpu-low"
+    cooldown: 300
+    metric_aggregation_type: "Average"
+    policy_type: "SimpleScaling"
     scaling_adjustment: -1
-    cooldown: 300
-    adjustment_type: "ChangeInCapacity"
 wimpy_aws_autoscaling_alarms:
-  - name: "{{ wimpy_project_name }}-cpu-high"
+  - name: "AlarmCpuHigh"
+    namespace: "AWS/EC2"
     metric: "CPUUtilization"
-    statistics: Average
-    comparison: ">="
+    statistics: "Average"
+    comparison: "GreaterThanOrEqualToThreshold"
     threshold: "{{ wimpy_aws_autoscaling_high_cpu_threshold }}"
     period: 300
     evaluation_periods: 2
     unit: "Percent"
     description: "CPU utilization is >= {{ wimpy_aws_autoscaling_high_cpu_threshold }}% for two periods of 5 minutes."
     dimensions:
-      AutoScalingGroupName: "{{ wimpy_project_name }}"
-    scaling_policy_name: "{{ wimpy_project_name }}-cpu-high"
+      AutoScalingGroupName: "{{ wimpy_asg_name }}"
+    scaling_policy_name: "ScalingPolicyCpuHigh"
 
-  - name: "{{ wimpy_project_name }}-cpu-low"
+  - name: "AlarmCpuLow"
+    namespace: "AWS/EC2"
     metric: "CPUUtilization"
-    statistics: Average
-    comparison: "<"
+    statistics: "Average"
+    comparison: "LessThanThreshold"
     threshold: "{{ wimpy_aws_autoscaling_low_cpu_threshold }}"
     period: 300
     evaluation_periods: 2
     unit: "Percent"
     description: "CPU utilization is < {{ wimpy_aws_autoscaling_low_cpu_threshold }}% for two periods of 5 minutes"
     dimensions:
-      AutoScalingGroupName: "{{ wimpy_project_name }}"
-    scaling_policy_name: "{{ wimpy_project_name }}-cpu-low"
-
-  - name: "{{ wimpy_project_name }}-healthy-nodes-low"
-    metric: "HealthyHostCount"
-    statistics: Average
-    comparison: "<"
-    threshold: "1"
-    period: 300
-    evaluation_periods: 1
-    unit: "Count"
-    description: "No healthy instances behind the ELB for 5 minutes"
-    dimensions:
-      ElasticLoadBalancerName: "GroupELB"
-    scaling_policy_name: "{{ wimpy_project_name }}-healthy-nodes-low"
+      AutoScalingGroupName: "{{ wimpy_asg_name }}"
+    scaling_policy_name: "ScalingPolicyCpuLow"
