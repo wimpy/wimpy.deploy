@@ -7,19 +7,17 @@ from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, Creatio
 import troposphere.elasticloadbalancing as elb
 from troposphere.route53 import RecordSetType
 import sys
+import ast
 
 __author__ = 'Jose Armesto'
 
 
 def generate_cloudformation_template():
     enable_elb = sys.argv[1]
-    input_scaling_policies = eval(sys.argv[2])
-    input_alarms = eval(sys.argv[3])
+    input_scaling_policies = ast.literal_eval(sys.argv[2])
+    input_alarms = ast.literal_eval(sys.argv[3])
 
-    if enable_elb == 'True':
-        enable_elb = True
-    else:
-        enable_elb = False
+    enable_elb = enable_elb == 'True'
 
     template = Template()
 
