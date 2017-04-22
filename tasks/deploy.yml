@@ -8,7 +8,7 @@
 
 - include: update_github_deployment.yml wimpy_deployment_status="pending" wimpy_deployment_description="Deployment started"
 
-- include: create_launchconfiguration.yml
+- include: configure_instances.yml
 
 - include: create_cloudformation_stack.yml
 
