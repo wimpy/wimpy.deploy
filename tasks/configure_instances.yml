@@ -1,0 +1,9 @@
+---
+
+- include: create_launchconfiguration.yml
+  when: wimpy_rollback_to_launchconfiguration is not defined
+
+- name: "Rolling back the CloudFormation to the Launch Configuration {{ wimpy_rollback_to_launchconfiguration }}"
+  set_fact:
+    wimpy_launch_configuration_name: wimpy_rollback_to_launchconfiguration
+

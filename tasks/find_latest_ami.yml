@@ -10,6 +10,8 @@
     sort_end: 1
     no_result_action: fail
   register: wimpy_aws_latest_ami
+  when: wimpy_aws_ami_id is undefined
 
 - set_fact:
     wimpy_aws_ami_id: "{{ wimpy_aws_latest_ami.results[0].ami_id }}"
+  when: wimpy_aws_latest_ami | succeeded

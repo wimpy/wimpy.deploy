@@ -1,7 +1,6 @@
 ---
 
 - include: find_latest_ami.yml
-  when: wimpy_aws_ami_id is undefined
 
 - include: find_previous_cloudformation.yml
 
@@ -9,9 +8,9 @@
 
 - include: update_github_deployment.yml wimpy_deployment_status="pending" wimpy_deployment_description="Deployment started"
 
-- include: create_launchconfiguration.yml
+- include: configure_instances.yml
 
-- include: launch_cloudformation.yml
+- include: create_cloudformation_stack.yml
 
 - include: remove_cloudformation.yml
   with_items: "{{ wimpy_aws_autoscaling_previous.results | default([]) }}"
