@@ -1,7 +1,5 @@
 ---
 
-- include: find_latest_ami.yml
-
 - include: find_previous_cloudformation.yml
 
 - include: create_github_deployment.yml
