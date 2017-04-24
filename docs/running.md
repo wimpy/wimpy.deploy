@@ -24,10 +24,10 @@ This is the Docker Compose file used to start your application
 ```yaml
 version: '2'
 services:
-  {{ wimpy_project_name }}:
+  {{ wimpy_application_name }}:
     image: {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
     ports:
-      - "{{ wimpy_app_port }}:{{ wimpy_app_port }}"
+      - "{{ wimpy_application_port }}:{{ wimpy_application_port }}"
 
 ```
 {% endraw %}

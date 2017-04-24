@@ -16,5 +16,5 @@
   register: wimpy_github_deployment_out
   ignore_errors: yes
   when:
-    - wimpy_github_repository != ''
+    - wimpy_application_github_repository != ''
     - wimpy_github_token is defined

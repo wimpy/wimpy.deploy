@@ -4,7 +4,8 @@
   fail: msg="{{ item }} is a required variable. Set it in your playbook file or pass it as extra var"
   when: not {{ item }} is defined
   with_items:
-    - wimpy_project_name
+    - wimpy_application_name
+    - wimpy_application_port
     - wimpy_docker_image_name
     - wimpy_release_version
     - wimpy_deployment_environment
@@ -17,10 +18,10 @@
 
 - name: "Check that project name contain only valid characters"
   fail: msg="Project name must have a maximum of 24 characters, must contain only alphanumeric characters or hyphens, and cannot begin or end with a hyphen."
-  when: (wimpy_project_name | length > 24) or
-        (wimpy_project_name | regex_findall("[^a-zA-Z0-9-]") | length > 0) or
-        (wimpy_project_name | regex_findall("(^-)") | length > 0) or
-        (wimpy_project_name | regex_findall("(-$)") | length > 0)
+  when: (wimpy_application_name | length > 24) or
+        (wimpy_application_name | regex_findall("[^a-zA-Z0-9-]") | length > 0) or
+        (wimpy_application_name | regex_findall("(^-)") | length > 0) or
+        (wimpy_application_name | regex_findall("(-$)") | length > 0)
 
 - include: "{{ wimpy_before_deploy_tasks_file | default('empty.yml') }}"
 - include: deploy.yml

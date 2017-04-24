@@ -27,7 +27,7 @@
       LoadBalancerSecurityGroup: "{{ ' ,'.join(wimpy_aws_elb_security_groups) if wimpy_aws_elb_security_groups is iterable and wimpy_aws_elb_security_groups is not string else wimpy_aws_elb_security_groups }}"
       LoadBalancerSubnets: "{{ ' ,'.join(wimpy_aws_elb_vpc_subnets) if wimpy_aws_elb_vpc_subnets is iterable and wimpy_aws_elb_vpc_subnets is not string else wimpy_aws_elb_vpc_subnets }}"
       LoadBalancerHealthCheckProtocol: "{{ wimpy_aws_elb_healthcheck_ping_protocol | upper }}"
-      LoadBalancerHealthCheckPort: "{{ wimpy_app_port | string }}"
+      LoadBalancerHealthCheckPort: "{{ wimpy_application_port | string }}"
       LoadBalancerHealthCheckPath: "{{ wimpy_aws_elb_healthcheck_ping_path }}"
       LoadBalancerHealthyThreshold: "{{ wimpy_aws_elb_healthcheck_healthy_threshold | string }}"
       LoadBalancerUnHealthyThreshold: "{{ wimpy_aws_elb_healthcheck_unhealthy_threshold | string }}"
@@ -51,7 +51,7 @@
     template: "/tmp/cloudformation_{{ wimpy_deploy_id }}.json"
     template_parameters: "{{ wimpy_cloudformation_parameters }}"
     tags:
-      Stack: "{{ wimpy_project_name }}"
+      Stack: "{{ wimpy_application_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
       Version: "{{ wimpy_release_version }}"
       Managed: "Wimpy"

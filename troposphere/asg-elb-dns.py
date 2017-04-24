@@ -224,11 +224,7 @@ def generate_cloudformation_template():
             CrossZone=True,
             SecurityGroups=Ref(loadbalancersecuritygroup),
             LoadBalancerName=Ref(loadbalancername),
-            Scheme=Ref(elb_schema),
-            Tags=[
-                Tag("Name", Ref(project_name), True),
-                Tag("Environment", Ref(environment), True)
-            ]
+            Scheme=Ref(elb_schema)
         ))
 
         route53record = template.add_resource(RecordSetType(

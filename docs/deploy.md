@@ -74,17 +74,17 @@ But you can also define your custom alarms and scaling policies (this would Wimp
 
 ```yaml
 wimpy_aws_autoscaling_policies:
-  - name: "{{ wimpy_project_name }}-cpu-high"
+  - name: "{{ wimpy_application_name }}-cpu-high"
     scaling_adjustment: 1
     cooldown: 300
     adjustment_type: "ChangeInCapacity"
 
-  - name: "{{ wimpy_project_name }}-cpu-low"
+  - name: "{{ wimpy_application_name }}-cpu-low"
     scaling_adjustment: -1
     cooldown: 300
     adjustment_type: "ChangeInCapacity"
 wimpy_aws_autoscaling_alarms:
-  - name: "{{ wimpy_project_name }}-cpu-high"
+  - name: "{{ wimpy_application_name }}-cpu-high"
     metric: "CPUUtilization"
     statistics: Average
     comparison: ">="
@@ -94,10 +94,10 @@ wimpy_aws_autoscaling_alarms:
     unit: "Percent"
     description: "CPU utilization is >= {{ wimpy_aws_autoscaling_high_cpu_threshold }}% for two periods of 5 minutes."
     dimensions:
-      AutoScalingGroupName: "{{ wimpy_project_name }}"
-    scaling_policy_name: "{{ wimpy_project_name }}-cpu-high"
+      AutoScalingGroupName: "{{ wimpy_application_name }}"
+    scaling_policy_name: "{{ wimpy_application_name }}-cpu-high"
 
-  - name: "{{ wimpy_project_name }}-cpu-low"
+  - name: "{{ wimpy_application_name }}-cpu-low"
     metric: "CPUUtilization"
     statistics: Average
     comparison: "<"
@@ -107,10 +107,10 @@ wimpy_aws_autoscaling_alarms:
     unit: "Percent"
     description: "CPU utilization is < {{ wimpy_aws_autoscaling_low_cpu_threshold }}% for two periods of 5 minutes"
     dimensions:
-      AutoScalingGroupName: "{{ wimpy_project_name }}"
-    scaling_policy_name: "{{ wimpy_project_name }}-cpu-low"
+      AutoScalingGroupName: "{{ wimpy_application_name }}"
+    scaling_policy_name: "{{ wimpy_application_name }}-cpu-low"
 
-  - name: "{{ wimpy_project_name }}-healthy-nodes-low"
+  - name: "{{ wimpy_application_name }}-healthy-nodes-low"
     metric: "HealthyHostCount"
     statistics: Average
     comparison: "<"
@@ -121,7 +121,7 @@ wimpy_aws_autoscaling_alarms:
     description: "No healthy instances behind the ELB for 5 minutes"
     dimensions:
       ElasticLoadBalancerName: "GroupELB"
-    scaling_policy_name: "{{ wimpy_project_name }}-healthy-nodes-low"
+    scaling_policy_name: "{{ wimpy_application_name }}-healthy-nodes-low"
 ```
 
 
