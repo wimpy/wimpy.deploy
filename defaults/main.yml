@@ -10,7 +10,24 @@ wimpy_service_healthcheck_retries: 10
 
 # Launch Configuration
 wimpy_aws_region: "eu-west-1"
-wimpy_aws_ami: "CoreOS-stable-*" # The latest version of this AMI name will be used
+wimpy_aws_coreos_amis:
+  eu-central-1: "ami-c6f424a9"
+  ap-northeast-1: "ami-ad0f2bca"
+  us-gov-west-1: "ami-070f8a66"
+  ap-northeast-2: "ami-2163b04f"
+  ca-central-1: "ami-d004b9b4"
+  ap-south-1: "ami-286d1e47"
+  sa-east-1: "ami-c51675a9"
+  ap-southeast-2: "ami-32d2dd51"
+  ap-southeast-1: "ami-deeb54bd"
+  us-east-1: "ami-6bb93c7d"
+  us-east-2: "ami-40f7d325"
+  us-west-2: "ami-fcc4539c"
+  us-west-1: "ami-ef015b8f"
+  eu-west-1: "ami-f6a49b90"
+  eu-west-2: "ami-16150172"
+
+wimpy_aws_ami_id: "{{ wimpy_aws_coreos_amis[wimpy_aws_region] }}"
 wimpy_aws_instance_type: "t2.small"
 #wimpy_aws_instance_role: ~
 wimpy_application_environment_vars: {}
