@@ -1,15 +1,22 @@
 ---
 
+wimpy_application_deploy_strategy: "rolling_asg"
+wimpy_application_github_repository: ""
+wimpy_application_bootstrap_timeout: 500s
+wimpy_application_signal_retries: 10
+wimpy_application_environment_vars: {}
+wimpy_application_pre_commands: []
+wimpy_application_post_commands: []
+wimpy_application_additional_units: []
+
 wimpy_docker_compose_version: "1.11.1"
 wimpy_docker_compose_file: "{{ lookup('env','PWD') }}/docker-compose-{{ wimpy_deployment_environment }}.yml"
 wimpy_docker_compose_template: "templates/docker-compose.yml.j2"
-wimpy_deploy_strategy: "rolling_asg"
-wimpy_github_repository: ""
-wimpy_service_start_timeout: 500s
-wimpy_service_healthcheck_retries: 10
 
 # Launch Configuration
 wimpy_aws_region: "eu-west-1"
+wimpy_aws_ami_id: "{{ wimpy_aws_coreos_amis[wimpy_aws_region] }}"
+wimpy_aws_instance_type: "t2.small"
 wimpy_aws_coreos_amis:
   eu-central-1: "ami-c6f424a9"
   ap-northeast-1: "ami-ad0f2bca"
@@ -27,20 +34,12 @@ wimpy_aws_coreos_amis:
   eu-west-1: "ami-f6a49b90"
   eu-west-2: "ami-16150172"
 
-wimpy_aws_ami_id: "{{ wimpy_aws_coreos_amis[wimpy_aws_region] }}"
-wimpy_aws_instance_type: "t2.small"
-#wimpy_aws_instance_role: ~
-wimpy_application_environment_vars: {}
-wimpy_application_pre_commands: []
-wimpy_application_post_commands: []
-wimpy_application_additional_units: []
-
 # CloudWatch logs
 wimpy_aws_cloudwatch_enabled: True
-wimpy_aws_logs_priority: 7
+wimpy_aws_cloudwatch_log_level: 7
 
 # Route53
-wimpy_aws_dns_name: "{{ wimpy_project_name }}"
+wimpy_aws_dns_name: "{{ wimpy_application_name }}"
 wimpy_aws_dns_ttl: "60"
 wimpy_aws_dns_weight: "10"
 
@@ -69,7 +68,7 @@ wimpy_aws_elb_healthcheck_healthy_threshold: 3
 wimpy_aws_elb_listeners:
   - protocol: "http"
     load_balancer_port: "80"
-    instance_port: "{{ wimpy_app_port }}"
+    instance_port: "{{ wimpy_application_port }}"
 
 # Auto Scaling Group
 wimpy_aws_autoscaling_keep_launch_configurations: "1"

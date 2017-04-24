@@ -4,11 +4,11 @@
   ec2_asg_facts:
     profile: "{{ boto_profile | default(omit) }}"
     region: "{{ wimpy_aws_region }}"
-    name: "{{ wimpy_project_name }}*"
+    name: "{{ wimpy_application_name }}*"
     tags:
-      Stack: "{{ wimpy_project_name }}"
+      Stack: "{{ wimpy_application_name }}"
       Environment: "{{ wimpy_deployment_environment }}"
   register: wimpy_aws_autoscaling_previous
   when:
     - wimpy_aws_autoscaling_destroy_previous
-    - wimpy_deploy_strategy != "rolling_asg"
+    - wimpy_application_deploy_strategy != "rolling_asg"

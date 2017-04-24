@@ -49,8 +49,8 @@ Now that we know basic Ansible jargon, a playbook to deploy our application coul
 - hosts: localhost
   connection: local
   vars:
-    wimpy_project_name: "my-awesome-project"
-    wimpy_app_port: "8080"
+    wimpy_application_name: "my-awesome-project"
+    wimpy_application_port: "8080"
     wimpy_aws_region: "eu-west-1"
     wimpy_aws_vpc_id: "vpc-ed1cc588"
     wimpy_vpc_subnets: ["subnet-asd234sa", "subnet-bcfg234sa"]
@@ -80,7 +80,7 @@ For example, if you just want to build a Docker Image and push it to Amazon Elas
 - hosts: localhost
   connection: local
   vars:
-    wimpy_project_name: "my-awesome-application"
+    wimpy_application_name: "my-awesome-application"
     wimpy_aws_region: "eu-west-1"
   roles:
     - role: wimpy.ecr
@@ -139,8 +139,8 @@ Then make our playbook to load the right file depending on the chosen environmen
     - "{{ playbook_dir }}/{{ wimpy_deployment_environment }}.yml"
   vars:
     # Put here parameters that remain the same across deployments/environments
-    wimpy_project_name: "my-awesome-application"
-    wimpy_app_port: 8080
+    wimpy_application_name: "my-awesome-application"
+    wimpy_application_port: 8080
   roles:
     - role: wimpy.ecr
     - role: wimpy.build

@@ -30,9 +30,9 @@ write_files:
     owner: core:core
     permissions: 0744
     content: |
-      log_group = "/{{ wimpy_deployment_environment }}/{{ wimpy_project_name }}"
+      log_group = "/{{ wimpy_deployment_environment }}/{{ wimpy_application_name }}"
       state_file = "/var/logs/journald-cloudwatch-logs/state"
-      log_priority = {{ wimpy_aws_logs_priority }}
+      log_priority = {{ wimpy_aws_cloudwatch_log_level }}
   - path: /home/core/install_cloudwatch_agent
     owner: core:core
     permissions: 0744
@@ -46,16 +46,16 @@ write_files:
 
 coreos:
   units:
-    - name: "{{ wimpy_project_name }}.service"
+    - name: "{{ wimpy_application_name }}.service"
       command: "start"
       content: |
         [Unit]
-        Description={{ wimpy_project_name }} container
+        Description={{ wimpy_application_name }} container
         After=install_docker_compose.service
         Requires=install_docker_compose.service
 
         [Service]
-        TimeoutStartSec={{ wimpy_service_start_timeout }}
+        TimeoutStartSec={{ wimpy_application_bootstrap_timeout }}
         User=core
         Restart=always
         Environment=KMS_MASTER_KEY={{ wimpy_aws_kms_key }}
@@ -72,7 +72,7 @@ coreos:
 {% for post_cmd in wimpy_application_post_commands %}
         ExecStartPost={{ post_cmd }}
 {% endfor %}
-        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_service_healthcheck_retries }}"
+        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_application_signal_retries }}"
         ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
 
         [Install]
