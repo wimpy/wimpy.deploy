@@ -1,18 +1,9 @@
 ---
 
-- include: find_previous_cloudformation.yml
-
-- include: create_github_deployment.yml
-
-- include: update_github_deployment.yml wimpy_deployment_status="pending" wimpy_deployment_description="Deployment started"
-
-- include: configure_instances.yml
+- include: configure_cloudformation.yml
 
 - include: create_cloudformation_stack.yml
 
-- include: remove_cloudformation.yml
-  with_items: "{{ wimpy_aws_autoscaling_previous.results | default([]) }}"
+- include: delete_previous_cloudformation.yml
 
 - include: clean_old_launch_configurations.yml
-
-- include: update_github_deployment.yml wimpy_deployment_status="success" wimpy_deployment_description="Deployment finished successfully"
