@@ -18,3 +18,5 @@
   when:
     - wimpy_application_github_repository != ''
     - wimpy_github_token is defined
+
+- include: update_github_deployment.yml wimpy_deployment_status="pending" wimpy_deployment_description="Deployment started"
