@@ -11,13 +11,15 @@
   register: wimpy_aws_cloudformation_facts
   when: wimpy_previous_cf != wimpy_asg_name
 
+- copy: content="{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_template'] }}" dest="/tmp/previous_cloudformation_{{ wimpy_deploy_id }}.json"
+
 - name: "Delete old ELB from weighted DNS"
   cloudformation:
     profile: "{{ boto_profile | default(omit) }}"
     stack_name: "{{ wimpy_previous_cf }}"
     state: "present"
     region: "{{ wimpy_aws_region }}"
-    template: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_template'] }}"
+    template: "/tmp/previous_cloudformation_{{ wimpy_deploy_id }}.json"
     template_parameters: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_parameters'] | combine({'NewDnsWeight': 0}) }}"
   when:
     - wimpy_previous_cf != wimpy_asg_name
