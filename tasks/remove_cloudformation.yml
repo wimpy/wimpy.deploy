@@ -11,7 +11,11 @@
   register: wimpy_aws_cloudformation_facts
   when: wimpy_previous_cf != wimpy_asg_name
 
-- copy: content="{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_template'] }}" dest="/tmp/previous_cloudformation_{{ wimpy_deploy_id }}.json"
+- name: "Dump previous CF template to disk"
+  copy:
+    content: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_template'] }}"
+    dest: "/tmp/previous_cloudformation_{{ wimpy_deploy_id }}.json"
+  when: wimpy_previous_cf != wimpy_asg_name
 
 - name: "Delete old ELB from weighted DNS"
   cloudformation:
@@ -28,7 +32,9 @@
 - name: "Waiting some seconds before removing previous CloudFormation"
   pause:
     seconds: "{{ (wimpy_aws_dns_ttl | int) * 2 }}"
-  when: wimpy_aws_elb_enable
+  when:
+    - wimpy_previous_cf != wimpy_asg_name
+    - wimpy_aws_elb_enable
 
 - name: "Remove previous CloudFormation"
   cloudformation:
