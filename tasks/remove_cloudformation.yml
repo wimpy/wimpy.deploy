@@ -25,7 +25,7 @@
 
 - name: "Waiting some seconds before removing previous CloudFormation"
   pause:
-    seconds: "{{ wimpy_aws_dns_ttl * 2 }}"
+    seconds: "{{ (wimpy_aws_dns_ttl | int) * 2 }}"
   when: wimpy_aws_elb_enable
 
 - name: "Remove previous CloudFormation"
