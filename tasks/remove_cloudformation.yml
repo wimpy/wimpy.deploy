@@ -11,20 +11,14 @@
   register: wimpy_aws_cloudformation_facts
   when: wimpy_previous_cf != wimpy_asg_name
 
-- name: "Delete ELB from DNS"
-  route53:
+- name: "Delete old ELB from weighted DNS"
+  cloudformation:
     profile: "{{ boto_profile | default(omit) }}"
+    stack_name: "{{ wimpy_previous_cf }}"
+    state: "present"
     region: "{{ wimpy_aws_region }}"
-    command: create
-    overwrite: True
-    zone: "{{ wimpy_aws_hosted_zone_name }}"
-    record: "{{ wimpy_aws_dns_name }}.{{ wimpy_aws_hosted_zone_name }}."
-    identifier: "{{ wimpy_previous_cf }}"
-    weight: "0"
-    ttl: "{{ wimpy_aws_dns_ttl }}"
-    type: "CNAME"
-    value: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_outputs']['LoadBalancer'] }}"
-  register: wimpy_disable_previous_elb_dns
+    template: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_template'] }}"
+    template_parameters: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_parameters'] | combine({'NewDnsWeight': 0}) }}"
   when:
     - wimpy_previous_cf != wimpy_asg_name
     - wimpy_aws_elb_enable
@@ -37,7 +31,7 @@
 - name: "Remove previous CloudFormation"
   cloudformation:
     profile: "{{ boto_profile | default(omit) }}"
-    region: "{{ wimpy_aws_region }}"
     stack_name: "{{ wimpy_previous_cf }}"
     state: "absent"
+    region: "{{ wimpy_aws_region }}"
   when: wimpy_previous_cf != wimpy_asg_name

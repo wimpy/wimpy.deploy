@@ -52,7 +52,7 @@ wimpy_aws_s3_bucket: ""
 
 # Elastic Load Balancer
 wimpy_aws_elb_enable: True # Whether or not to assign an ELB in front of the ASG instances
-wimpy_aws_elb_scheme: "internal" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
+wimpy_aws_elb_scheme: "internet-facing" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
 wimpy_aws_elb_draining_timeout: "10" # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_aws_elb_enable_draining: "True"
 wimpy_aws_elb_cross_az: "no" # Distribute load across all configured Availability Zones
