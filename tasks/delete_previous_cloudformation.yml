@@ -11,7 +11,7 @@
   register: wimpy_aws_autoscaling_previous
   when:
     - wimpy_aws_autoscaling_destroy_previous
-    - wimpy_application_deploy_strategy != "rolling_asg"
+    - wimpy_application_deploy_strategy != "RollingUpdate"
 
 - include: remove_cloudformation.yml
   with_items: "{{ wimpy_aws_autoscaling_previous.results | default([]) }}"

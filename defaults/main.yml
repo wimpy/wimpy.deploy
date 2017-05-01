@@ -1,8 +1,8 @@
 ---
 
-wimpy_application_deploy_strategy: "rolling_asg"
+wimpy_application_deploy_strategy: "RollingUpdate"
 wimpy_application_github_repository: ""
-wimpy_application_bootstrap_timeout: 500s
+wimpy_application_bootstrap_timeout: 500s # If a systemd service does not signal start-up completion within the configured time, the service will be considered failed and will be shut down again
 wimpy_application_signal_retries: 10
 wimpy_application_environment_vars: {}
 wimpy_application_pre_commands: []
