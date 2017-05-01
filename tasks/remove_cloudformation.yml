@@ -24,7 +24,7 @@
     state: "present"
     region: "{{ wimpy_aws_region }}"
     template: "/tmp/previous_cloudformation_{{ wimpy_deploy_id }}.json"
-    template_parameters: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_parameters'] | combine({'NewDnsWeight': 0}) }}"
+    template_parameters: "{{ wimpy_aws_cloudformation_facts['ansible_facts']['cloudformation'][wimpy_previous_cf]['stack_parameters'] | combine({'NewDnsWeight': '0'}) }}"
   when:
     - wimpy_previous_cf != wimpy_asg_name
     - wimpy_aws_elb_enable
