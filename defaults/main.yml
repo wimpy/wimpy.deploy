@@ -17,6 +17,7 @@ wimpy_docker_compose_template: "templates/docker-compose.yml.j2"
 wimpy_aws_region: "eu-west-1"
 wimpy_aws_ami_id: "{{ wimpy_aws_coreos_amis[wimpy_aws_region] }}"
 wimpy_aws_instance_type: "t2.small"
+wimpy_aws_assign_public_ip: True
 wimpy_aws_coreos_amis:
   eu-central-1: "ami-c6f424a9"
   ap-northeast-1: "ami-ad0f2bca"
@@ -52,7 +53,7 @@ wimpy_aws_s3_bucket: ""
 
 # Elastic Load Balancer
 wimpy_aws_elb_enable: True # Whether or not to assign an ELB in front of the ASG instances
-wimpy_aws_elb_scheme: "internet-facing" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
+wimpy_aws_elb_scheme: "{{ 'internet-facing' if wimpy_aws_assign_public_ip else 'internal' }}" # Private or public ip's for instances behind. Possible values: 'internal' or 'internet-facing'
 wimpy_aws_elb_draining_timeout: "10" # Wait a specified timeout allowing connections to drain before terminating an instance
 wimpy_aws_elb_enable_draining: "True"
 wimpy_aws_elb_cross_az: "no" # Distribute load across all configured Availability Zones
