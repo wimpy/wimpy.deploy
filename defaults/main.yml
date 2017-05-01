@@ -62,10 +62,10 @@ wimpy_aws_elb_stickiness:
   type: "loadbalancer"
 wimpy_aws_elb_healthcheck_ping_protocol: "http"
 wimpy_aws_elb_healthcheck_ping_path: "/health"
-wimpy_aws_elb_healthcheck_response_timeout: 5
-wimpy_aws_elb_healthcheck_interval: 10
+wimpy_aws_elb_healthcheck_response_timeout: 4
+wimpy_aws_elb_healthcheck_interval: 5
 wimpy_aws_elb_healthcheck_unhealthy_threshold: 2
-wimpy_aws_elb_healthcheck_healthy_threshold: 3
+wimpy_aws_elb_healthcheck_healthy_threshold: 2
 wimpy_aws_elb_listeners:
   - protocol: "http"
     load_balancer_port: "80"
