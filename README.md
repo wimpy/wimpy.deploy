@@ -1,4 +1,4 @@
-# Wimpy
+# Wimpy Deploy [![Build Status](https://travis-ci.org/wimpy/wimpy.deploy.svg?branch=master)](https://travis-ci.org/wimpy/wimpy.deploy)
 Ansible playbook to deploy Docker containers to AWS EC2 instances.
 
 ## Requirements
