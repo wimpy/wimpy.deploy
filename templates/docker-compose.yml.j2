@@ -4,3 +4,6 @@ services:
     image: {{ wimpy_docker_image_name }}:{{ wimpy_release_version }}
     ports:
       - "{{ wimpy_application_port }}:{{ wimpy_application_port }}"
+    environment:
+      - S3_BUCKET
+      - KMS_MASTER_KEY
