@@ -58,6 +58,7 @@ coreos:
         TimeoutStartSec={{ wimpy_application_bootstrap_timeout }}
         User=core
         Restart=always
+        Environment=ENVIRONMENT={{ wimpy_deployment_environment }}
         Environment=KMS_MASTER_KEY={{ wimpy_aws_kms_key }}
         Environment=S3_BUCKET={{ wimpy_aws_s3_application_bucket }}
 {% for env_key, env_value in wimpy_application_environment_vars.items() %}
@@ -72,7 +73,7 @@ coreos:
 {% for post_cmd in wimpy_application_post_commands %}
         ExecStartPost={{ post_cmd }}
 {% endfor %}
-        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_application_signal_retries }}"
+        ExecStartPost=/home/core/healthcheck.sh "{{ wimpy_asg_name }}" "{{ wimpy_aws_elb_enable }}" AutoscalingGroup "{{ wimpy_aws_region }}" "{{ wimpy_aws_elb_healthcheck_interval }}"
         ExecStop=/opt/bin/docker-compose -f /home/core/docker-compose.yml down
 
         [Install]
