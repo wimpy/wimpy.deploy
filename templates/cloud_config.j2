@@ -59,6 +59,7 @@ coreos:
         User=core
         Restart=always
         Environment=ENVIRONMENT={{ wimpy_deployment_environment }}
+        Environment=DOCKER_REGISTRY={{ wimpy_docker_registry }}
         Environment=KMS_MASTER_KEY={{ wimpy_aws_kms_key }}
         Environment=S3_BUCKET={{ wimpy_aws_s3_application_bucket }}
 {% for env_key, env_value in wimpy_application_environment_vars.items() %}
