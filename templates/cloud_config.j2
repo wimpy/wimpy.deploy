@@ -13,7 +13,7 @@ write_files:
     permissions: 0644
 {% if wimpy_docker_compose_file_provided.stat.exists %}
     content: |
-      {{ lookup('file', wimpy_docker_compose_file) | regex_replace('image: \"?([a-zA-Z0-9_\$\{\}/.-:]+)\"?', 'image: \\1:' + wimpy_release_version) | indent(6, False) }}
+      {{ lookup('file', wimpy_docker_compose_file) | regex_replace('image: \"?([a-zA-Z0-9_\$\{\}/.:-]+)\"?', 'image: \\1:' + wimpy_release_version) | indent(6, False) }}
 {% else %}
     content: |
       {{ lookup('file', '/tmp/docker-compose_' ~ wimpy_deploy_id ~ '.yml') | indent(6, False) }}
