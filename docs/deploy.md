@@ -28,8 +28,8 @@ Although you can also configure
 ## A CloudFormation for all your resources
 You application is deployed using a CloudFormation stack that contains:
 - The AutoScaling Group with EC2 instances.
-- An Elastic Load Balancer to distribute the load between your applications.
-- A DNS name in Route53 that targets the Load Balancer.
+- (Optional) An Elastic Load Balancer to distribute the load between your applications.
+- (Optional) A DNS name in Route53 that targets the Load Balancer.
 
 ### Creating the Auto Scaling Group
 Wimpy creates an AutoScaling Group for every application. You don't have to worry about most of the configuration because Wimpy already provides sane defaults.
@@ -125,7 +125,12 @@ wimpy_aws_autoscaling_alarms:
 ```
 
 ### Deployment Strategies
-How this CloudFormation behaves depends on your Deployment Strategy.
+How this CloudFormation behaves depends on your Deployment Strategy. This can be selected with the property
+
+```yaml
+# You can choose which deployment strategy to use RollingUpdate or BlueGreen.
+wimpy_application_deploy_strategy: "RollingUpdate"
+```
 
 #### Rolling Update
 By default, [wimpy.deploy](https://github.com/wimpy/wimpy.deploy) will use a Rolling Update strategy.
