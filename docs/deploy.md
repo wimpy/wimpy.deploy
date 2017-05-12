@@ -124,6 +124,17 @@ wimpy_aws_autoscaling_alarms:
     scaling_policy_name: "{{ wimpy_application_name }}-healthy-nodes-low"
 ```
 
+### Deployment Strategies
+How this CloudFormation behaves depends on your Deployment Strategy.
+
+#### Rolling Update
+By default, [wimpy.deploy](https://github.com/wimpy/wimpy.deploy) will use a Rolling Update strategy.
+This means that a CloudFormation is created that will create an Auto Scaling Group with EC2 instances.
+
+Every deploy will trigger a Rolling Update on the Auto Scaling Group, that will replace instances containing the old version of your application, with instances containing the version being deployed.
+#### Blue / Green deployment
+In this strategy, instead of having a single CloudFormation replacing instances of the Auto Scaling Group, we create a different CloudFormation for every version deployed.
+
 
 ### Signals: Deciding if the deployment has been successful
 Wimpy instructs AWS CloudFormation to complete the stack creation only after your application is running and not after all the stack resources are created.
