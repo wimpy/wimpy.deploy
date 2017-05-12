@@ -7,24 +7,9 @@ title: Wimpy Deployments
 Wimpy is a opinionated deploy pipeline that implements best-practices for deploying applications on [AWS (Amazon Web Services)](https://aws.amazon.com/).
 It's build as a set of [Ansible](https://www.ansible.com/) roles that you can run in a playbook. And since it's ran by Ansible, it's really easy to extend to do exactly what you want.
 
-The `wimpy.environment` role will create the following resources on your AWS account:
-- A S3 bucket for application to store files, and another one for audit logs and CloudWatch application logs.
-- KMS key to encrypt and decrypt application secrets.
-- Virtual Private Cloud (VPC) for every environment, typically staging and production.
-- AWS Elastic Container Registry (ECR) to store Docker images of your applications.
-- Security Groups required for a three layer networking architecture.
-- IAM roles required for your applications to access S3, KMS or ECR.
-
-The `wimpy.build` role will build a docker image for your application and push it to an AWS Elastic Container Registry.
-
-The `wimpy.deploy` role will create the following resources on your AWS account: 
-- Instances of an AutoScaling Group running a Docker container with the desired version of your application.
-- (Optional) A load balancer (Elastic Load Balancer) to balance the traffic between the AutoScaling Group instances.
-- (Optional) A domain name (Route53) pointing to the Load Balancer.
-
 Following Continuous Deployment practices, you can execute the playbook on every change merged to your application master branch so on every change Wimpy will
 - Make sure all the infrastructure is in place and with the right configuration, only spending time when something is not created yet.
-- Publish a new Docker image of your application that your developers can use locally if needed.
+- Publish a new Docker image of your application to a Docker registry.
 - Deploy the new version of your application to the selected environment using one of the available deployment strategies.
 
 ## Installation
@@ -127,7 +112,7 @@ wimpy_aws_elb_scheme: "internal"
 ```
 
 Then make our playbook to load the right file depending on the chosen environment.
-
+{% raw %}
 ```yaml
 - hosts: localhost
   connection: local
@@ -144,6 +129,7 @@ Then make our playbook to load the right file depending on the chosen environmen
     - role: wimpy.deploy
 
 ```
+{% endraw %}
 
 And run the playbook passing the parameters that change on every deployment: the version of your application that you want to deploy (typically a Git SHA1 commit) and to which environment you want to deploy it.
 
@@ -156,6 +142,7 @@ $ docker run --rm -it \
 ```
 
 ## Learn More
+- [Preparing the AWS Account environment](environment.md)
 - [Packaging your application](building.md)
 - [Creating Auto Scaling Groups on your AWS account](deploy.md)
 - [Running your application with Docker inside EC2 instances](running.md)
