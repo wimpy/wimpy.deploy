@@ -31,6 +31,6 @@
     instance_monitoring: "{{ wimpy_aws_instance_monitoring | default(omit) }}"
     ebs_optimized: "{{ wimpy_aws_ebs_optimized | default(omit) }}"
     volumes: "{{ wimpy_aws_volumes | default(omit) }}"
-    assign_public_ip: "{{ wimpy_aws_assign_public_ip | default(omit) }}"
+    assign_public_ip: "{{ wimpy_aws_assign_public_ip }}"
     user_data: "{{ lookup('file', wimpy_aws_autoscaling_launch_configuration_user_data.dest) }}"
   register: wimpy_aws_autoscaling_launch_configuration
