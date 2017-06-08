@@ -1,5 +1,5 @@
 from troposphere import Join, Output, GetAtt
-from troposphere import Parameter, Ref, Template
+from troposphere import Parameter, Ref, Template, Not, Equals, If
 from troposphere.autoscaling import AutoScalingGroup, Tag, ScalingPolicy
 from troposphere.cloudwatch import Alarm, MetricDimension
 from troposphere.policies import UpdatePolicy, AutoScalingRollingUpdate, CreationPolicy, \
@@ -105,6 +105,8 @@ def generate_cloudformation_template():
             Description="S3 Bucket for the ELB access logs"
         ))
 
+        template.add_condition("ElbLoggingCondition", Not(Equals(Ref(elb_bucket_name), "")))
+
         loadbalancername = template.add_parameter(Parameter(
             "LoadBalancerName",
             Type="String",
@@ -202,12 +204,13 @@ def generate_cloudformation_template():
 
         loadbalancer = template.add_resource(elb.LoadBalancer(
             "LoadBalancer",
-            AccessLoggingPolicy=elb.AccessLoggingPolicy(
-                EmitInterval=60,
-                Enabled=True,
-                S3BucketName=Ref(elb_bucket_name),
-                S3BucketPrefix="ELBLogs"
-            ),
+            AccessLoggingPolicy=If("ElbLoggingCondition",
+                                   elb.AccessLoggingPolicy(
+                                       EmitInterval=60,
+                                       Enabled=True,
+                                       S3BucketName=Ref(elb_bucket_name),
+                                       S3BucketPrefix="ELBLogs"),
+                                   Ref("AWS::NoValue")),
             ConnectionDrainingPolicy=elb.ConnectionDrainingPolicy(
                 Enabled=Ref(enable_connection_draining),
                 Timeout=Ref(connection_draining_timeout),
