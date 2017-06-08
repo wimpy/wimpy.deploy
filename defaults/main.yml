@@ -81,6 +81,8 @@ wimpy_aws_elb_scheme: "internet-facing"
 wimpy_aws_elb_draining_timeout: "10"
 # Enable draining of connections from ELB
 wimpy_aws_elb_enable_draining: "True"
+# Name of the bucket to store ELB logs
+wimpy_aws_s3_elb_bucket: ""
 # Distribute load across all configured Availability Zones
 wimpy_aws_elb_cross_az: "no"
 # Enable ELB stickiness
