@@ -105,7 +105,7 @@ def generate_cloudformation_template():
             Description="S3 Bucket for the ELB access logs"
         ))
 
-        template.add_condition("LogginELBCondition", Not(Equals(Ref(elb_bucket_name), "")))
+        template.add_condition("ElbLoggingCondition", Not(Equals(Ref(elb_bucket_name), "")))
 
         loadbalancername = template.add_parameter(Parameter(
             "LoadBalancerName",
@@ -204,7 +204,7 @@ def generate_cloudformation_template():
 
         loadbalancer = template.add_resource(elb.LoadBalancer(
             "LoadBalancer",
-            AccessLoggingPolicy=If("LogginELBCondition",
+            AccessLoggingPolicy=If("ElbLoggingCondition",
                                    elb.AccessLoggingPolicy(
                                        EmitInterval=60,
                                        Enabled=True,
