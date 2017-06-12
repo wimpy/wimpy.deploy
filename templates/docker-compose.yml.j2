@@ -9,3 +9,6 @@ services:
       - S3_BUCKET
       - KMS_MASTER_KEY
       - PORT
+{% for env_key in wimpy_application_environment_vars.keys() %}
+      - {{ env_key }}
+{% endfor %}
