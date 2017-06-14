@@ -183,6 +183,8 @@ def generate_cloudformation_template():
             Type="String",
         ))
 
+        template.add_condition("ElbTCPProtocolCondition", Equals(Ref(health_check_protocol), "TCP"))
+
         health_check_port = template.add_parameter(Parameter(
             "LoadBalancerHealthCheckPort",
             Type="String",
@@ -217,7 +219,10 @@ def generate_cloudformation_template():
             ),
             Subnets=Ref(elb_subnets),
             HealthCheck=elb.HealthCheck(
-                Target=Join("", [Ref(health_check_protocol), ":", Ref(health_check_port), Ref(health_check_path)]),
+                Target=Join("", [Ref(health_check_protocol), ":", Ref(health_check_port), If("ElbTCPProtocolCondition",
+                                                                                             Ref("AWS::NoValue"),
+                                                                                             Ref(health_check_path))
+                                 ]),
                 HealthyThreshold=Ref(healthy_threshold),
                 UnhealthyThreshold=Ref(unhealthy_threshold),
                 Interval=Ref(health_check_interval),
