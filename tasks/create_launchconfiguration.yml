@@ -10,6 +10,8 @@
     dest: "/tmp/docker-compose_{{ wimpy_deploy_id }}.yml"
   when: not wimpy_docker_compose_file_provided.stat.exists
 
+- include: resolve_docker_login.yml
+
 - name: "Render cloud-config"
   template:
     src: "templates/cloud_config.j2"

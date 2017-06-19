@@ -66,7 +66,9 @@ coreos:
 {% for env_key, env_value in wimpy_application_environment_vars.items() %}
         Environment={{ env_key }}={{ env_value }}
 {% endfor %}
-        ExecStartPre=/usr/bin/sh -c '/usr/bin/$(/usr/bin/docker run --rm xueshanf/awscli aws ecr get-login --region {{ wimpy_aws_region }})'
+{% if wimpy_docker_login is defined %}
+        ExecStartPre={{ wimpy_docker_login }}
+{% endif %}
 {% for pre_cmd in wimpy_application_pre_commands %}
         ExecStartPre={{ pre_cmd }}
 {% endfor %}

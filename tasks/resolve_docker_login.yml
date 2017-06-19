@@ -1,0 +1,16 @@
+---
+
+- name: Use aws ecr
+  set_fact:
+    wimpy_docker_login: "/usr/bin/sh -c '/usr/bin/$(/usr/bin/docker run --rm xueshanf/awscli aws ecr get-login --region {{ wimpy_aws_region }})'"
+  when: wimpy_docker_image_name | search("ecr.{{ wimpy_aws_region }}.amazonaws.com/.+")
+
+- name: Use docker login
+  set_fact:
+    wimpy_docker_login: "/usr/bin/docker login -u {{ wimpy_docker_registry_username }} {% if wimpy_docker_registry_email is defined and wimpy_docker_registry_email != '' %}-e {{ wimpy_docker_registry_email }} {% endif %}-p {{ wimpy_docker_registry_password }} {{ wimpy_docker_registry }}"
+  when:
+    - wimpy_docker_registry_username is defined and wimpy_docker_registry_username != ""
+    - wimpy_docker_registry_password is defined and wimpy_docker_registry_password != ""
+    - wimpy_use_aws_ecr is not defined
+
+...

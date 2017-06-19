@@ -75,6 +75,16 @@ wimpy_docker_compose_file: "{{ lookup('env','PWD') }}/docker-compose-{{ wimpy_de
 # Template to be used when no docker-compose file is provided by the application
 wimpy_docker_compose_template: "templates/docker-compose.yml.j2"
 
+# Docker registry login configuration - Set only if using private images and login is required. You can use the same values used in wimpy.build
+# Docker registry url/host. The trailing slash is not required but it works with it anyway
+wimpy_docker_registry: ""
+# Docker registry username
+wimpy_docker_registry_username: ""
+# Docker registry email (only if needed)
+wimpy_docker_registry_email: ""
+# Docker registry password
+wimpy_docker_registry_password: ""
+  
 # Launch Configuration
 # AWS Region where to deploy
 wimpy_aws_region: "eu-west-1"
