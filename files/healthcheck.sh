@@ -16,7 +16,8 @@ function cfn-signal() {
 trap cfn-signal EXIT
 
 if [ ${USING_ELB} == 'True' ]; then
-    until [ "$state" == "\"InService\"" ]; do state=$(/usr/bin/docker run --rm xueshanf/awscli aws elb describe-instance-health --region ${AWS_REGION} --load-balancer-name ${STACK_NAME} --instances $(curl -s http://169.254.169.254/latest/meta-data/instance-id) --query InstanceStates[0].State); sleep ${SLEEP}; done
+    LOAD_BALANCER_NAME=$(/usr/bin/docker run --rm xueshanf/awscli aws cloudformation describe-stack-resources --region ${AWS_REGION} --stack-name ${STACK_NAME} --query 'StackResources[?ResourceType==`AWS::ElasticLoadBalancing::LoadBalancer`].PhysicalResourceId' --output text)
+    until [ "$state" == "\"InService\"" ]; do state=$(/usr/bin/docker run --rm xueshanf/awscli aws elb describe-instance-health --region ${AWS_REGION} --load-balancer-name ${LOAD_BALANCER_NAME} --instances $(curl -s http://169.254.169.254/latest/meta-data/instance-id) --query InstanceStates[0].State); sleep ${SLEEP}; done
 else
     sleep ${SLEEP} # It takes compose a few seconds to create the container
     CONTAINER_NAME=$(/opt/bin/docker-compose -f /home/core/docker-compose.yml ps | head -n 3 | tail -n 1 | cut -f 1 -d" ")

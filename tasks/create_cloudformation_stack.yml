@@ -22,7 +22,6 @@
       DNSRecord: "{{ wimpy_aws_dns_name }}"
       DNSTTL: "{{ wimpy_aws_dns_ttl }}"
       NewDnsWeight: "{{ wimpy_aws_dns_weight }}"
-      LoadBalancerName: "{{ wimpy_elb_name }}"
       LoadBalancerSchema: "{{ wimpy_aws_elb_scheme }}"
       LoadBalancerSecurityGroup: "{{ ' ,'.join(wimpy_aws_elb_security_groups) if wimpy_aws_elb_security_groups is iterable and wimpy_aws_elb_security_groups is not string else wimpy_aws_elb_security_groups }}"
       LoadBalancerSubnets: "{{ ' ,'.join(wimpy_aws_elb_vpc_subnets) if wimpy_aws_elb_vpc_subnets is iterable and wimpy_aws_elb_vpc_subnets is not string else wimpy_aws_elb_vpc_subnets }}"

@@ -107,11 +107,6 @@ def generate_cloudformation_template():
 
         template.add_condition("ElbLoggingCondition", Not(Equals(Ref(elb_bucket_name), "")))
 
-        loadbalancername = template.add_parameter(Parameter(
-            "LoadBalancerName",
-            Type="String",
-        ))
-
         elb_schema = template.add_parameter(Parameter(
             "LoadBalancerSchema",
             Type="String",
@@ -231,7 +226,6 @@ def generate_cloudformation_template():
             Listeners=load_balancer_listeners,
             CrossZone=True,
             SecurityGroups=Ref(loadbalancersecuritygroup),
-            LoadBalancerName=Ref(loadbalancername),
             Scheme=Ref(elb_schema)
         ))
 

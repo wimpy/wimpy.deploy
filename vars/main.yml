@@ -2,9 +2,8 @@
 
 wimpy_deploy_id: "{{ ansible_date_time.iso8601_micro | to_uuid }}"
 
-wimpy_launch_configuration_name: "{{ wimpy_elb_name }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
-wimpy_elb_name: "{{ wimpy_deployment_environment }}-{{ ( wimpy_application_deploy_strategy == 'RollingUpdate' ) | ternary(wimpy_application_name, wimpy_application_name ~ '-' ~ wimpy_release_version[:7]) }}"
-wimpy_asg_name: "{{ wimpy_elb_name }}"
+wimpy_launch_configuration_name: "{{ wimpy_application_name }}-{{ ansible_date_time.iso8601 | regex_replace('[^a-zA-Z0-9]', '-') }}"
+wimpy_asg_name: "{{ wimpy_deployment_environment }}-{{ ( wimpy_application_deploy_strategy == 'RollingUpdate' ) | ternary(wimpy_application_name, wimpy_application_name ~ '-' ~ wimpy_release_version[:7]) }}"
 
 wimpy_github_url_parts: "{{ wimpy_application_github_repository.split('/') }}"
 wimpy_github_proto: "{{ wimpy_github_url_parts[0] | default('') | regex_replace(':', '') }}"

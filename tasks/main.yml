@@ -17,9 +17,8 @@
     - wimpy_aws_lc_security_groups
 
 - name: "Check that project name contain only valid characters"
-  fail: msg="Project name must have a maximum of 24 characters, must contain only alphanumeric characters or hyphens, and cannot begin or end with a hyphen."
-  when: (wimpy_application_name | length > 24) or
-        (wimpy_application_name | regex_findall("[^a-zA-Z0-9-]") | length > 0) or
+  fail: msg="Project name must contain only alphanumeric characters or hyphens, and cannot begin or end with a hyphen."
+  when: (wimpy_application_name | regex_findall("[^a-zA-Z0-9-]") | length > 0) or
         (wimpy_application_name | regex_findall("(^-)") | length > 0) or
         (wimpy_application_name | regex_findall("(-$)") | length > 0)
 
