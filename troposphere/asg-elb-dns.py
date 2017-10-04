@@ -191,12 +191,16 @@ def generate_cloudformation_template():
         ))
 
         load_balancer_listeners = []
-        for listener in elb_listeners:
+        for index, listener in enumerate(elb_listeners):
+            template.add_condition("SSLCertificateCondition" + str(index), Equals(listener['protocol'], "https"))
             load_balancer_listeners.append(elb.Listener(
                 LoadBalancerPort=listener['load_balancer_port'],
                 InstancePort=listener['instance_port'],
                 Protocol=listener['protocol'],
                 InstanceProtocol=Ref(health_check_protocol),
+                SSLCertificateId=If("SSLCertificateCondition" + str(index),
+                                    listener.get('ssl_certificate_id', ''),
+                                    Ref("AWS::NoValue")),
             ))
 
         loadbalancer = template.add_resource(elb.LoadBalancer(

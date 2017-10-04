@@ -178,6 +178,8 @@ wimpy_aws_elb_listeners:
   - protocol: "http"
     load_balancer_port: "80"
     instance_port: "{{ wimpy_application_port }}"
+    # ARN of the SSL certificate to be attached
+    ssl_certificate_id: ""
 
 # Auto Scaling Group
 # Number of launch configurations to keep. They can be used for fast rollback.
