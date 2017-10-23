@@ -12,5 +12,4 @@
     - wimpy_docker_registry_username is defined and wimpy_docker_registry_username != ""
     - wimpy_docker_registry_password is defined and wimpy_docker_registry_password != ""
     - wimpy_use_aws_ecr is not defined
-
-...
+    - wimpy_docker_login is not defined
