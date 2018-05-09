@@ -2,7 +2,7 @@
 
 - name: Use aws ecr
   set_fact:
-    wimpy_docker_login: "/usr/bin/sh -c '/usr/bin/$(/usr/bin/docker run --rm xueshanf/awscli aws ecr get-login --region {{ wimpy_aws_region }})'"
+    wimpy_docker_login: "/usr/bin/sh -c '/usr/bin/$(/usr/bin/docker run --rm xueshanf/awscli aws ecr get-login --no-include-email --region {{ wimpy_aws_region }})'"
   when: wimpy_docker_image_name | search("ecr.{{ wimpy_aws_region }}.amazonaws.com/.+")
 
 - name: Use docker login
